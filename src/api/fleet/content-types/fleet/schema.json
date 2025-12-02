@@ -1,0 +1,71 @@
+{
+  "kind": "collectionType",
+  "collectionName": "fleets",
+  "info": {
+    "singularName": "fleet",
+    "pluralName": "fleets",
+    "displayName": "Fleet",
+    "description": "Gestión de vehículos en la flota"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "vin": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["nuevo", "usado", "seminuevo"],
+      "required": true,
+      "default": "nuevo"
+    },
+    "brand": {
+      "type": "string",
+      "required": true
+    },
+    "model": {
+      "type": "string",
+      "required": true
+    },
+    "year": {
+      "type": "integer",
+      "required": true,
+      "min": 1900,
+      "max": 2100
+    },
+    "color": {
+      "type": "string"
+    },
+    "mileage": {
+      "type": "integer",
+      "min": 0
+    },
+    "fuelType": {
+      "type": "string"
+    },
+    "transmission": {
+      "type": "string"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "imageAlt": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "collectionName": "components_layout_singin_forms",
+  "info": {
+    "displayName": "singin_form"
+  },
+  "options": {},
+  "attributes": {
+    "header": {
+      "type": "component",
+      "component": "layout.header-section",
+      "repeatable": false
+    },
+    "email_label": {
+      "type": "string",
+      "required": true
+    },
+    "email_placeholder": {
+      "type": "string",
+      "required": true
+    },
+    "password_label": {
+      "type": "string",
+      "required": true
+    },
+    "password_placeholder": {
+      "type": "string",
+      "required": true
+    },
+    "submit_button": {
+      "type": "string",
+      "required": true
+    },
+    "singup_previous_link_text": {
+      "type": "string",
+      "required": true
+    },
+    "singup_link": {
+      "type": "component",
+      "component": "component.link",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}
