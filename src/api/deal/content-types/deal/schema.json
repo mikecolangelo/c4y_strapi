@@ -1,0 +1,95 @@
+{
+  "kind": "collectionType",
+  "collectionName": "deals",
+  "info": {
+    "singularName": "deal",
+    "pluralName": "deals",
+    "displayName": "Deal",
+    "description": "Contratos y acuerdos comerciales"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["conduccion", "arrendamiento", "servicio"],
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pendiente", "firmado", "archivado"],
+      "required": true,
+      "default": "pendiente"
+    },
+    "generatedAt": {
+      "type": "date"
+    },
+    "signedAt": {
+      "type": "date"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "paymentAgreement": {
+      "type": "enumeration",
+      "enum": ["semanal", "quincenal"],
+      "default": "semanal"
+    },
+    "summary": {
+      "type": "text"
+    },
+    "client": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::client.client",
+      "inversedBy": "deals"
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "deals"
+    },
+    "seller": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "deals"
+    },
+    "documents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contract-document.contract-document",
+      "mappedBy": "deal"
+    },
+    "clauses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::deal-clause.deal-clause",
+      "mappedBy": "deal"
+    },
+    "discounts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::deal-discount.deal-discount",
+      "mappedBy": "deal"
+    },
+    "billingRecords": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::billing-record.billing-record",
+      "mappedBy": "deal"
+    },
+    "appointments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::appointment.appointment",
+      "mappedBy": "deal"
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventory_items",
+  "info": {
+    "singularName": "inventory-item",
+    "pluralName": "inventory-items",
+    "displayName": "Inventory Item"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "code": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "description": {
+      "type": "string",
+      "required": true
+    },
+    "assignedTo": {
+      "type": "string"
+    },
+    "stock": {
+      "type": "integer",
+      "default": 0,
+      "required": true
+    },
+    "stockStatus": {
+      "type": "enumeration",
+      "enum": ["high", "medium", "low"],
+      "required": true,
+      "default": "medium"
+    },
+    "minStock": {
+      "type": "integer"
+    },
+    "maxStock": {
+      "type": "integer"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "lastRestocked": {
+      "type": "date"
+    },
+    "icon": {
+      "type": "enumeration",
+      "enum": ["filter", "disc", "bolt", "tire"],
+      "default": "filter"
+    },
+    "serviceOrders": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service-order.service-order",
+      "mappedBy": "inventoryItems"
+    },
+    "notes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::inventory-note.inventory-note",
+      "mappedBy": "item"
+    }
+  }
+}

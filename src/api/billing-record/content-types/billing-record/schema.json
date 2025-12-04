@@ -1,0 +1,71 @@
+{
+  "kind": "collectionType",
+  "collectionName": "billing_records",
+  "info": {
+    "singularName": "billing-record",
+    "pluralName": "billing-records",
+    "displayName": "Billing Record"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "invoiceNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "amount": {
+      "type": "decimal",
+      "required": true
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pagado", "pendiente", "retrasado"],
+      "required": true,
+      "default": "pendiente"
+    },
+    "dueDate": {
+      "type": "date"
+    },
+    "paymentDate": {
+      "type": "date"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "remindersSent": {
+      "type": "integer",
+      "default": 0
+    },
+    "client": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::client.client",
+      "inversedBy": "billingRecords"
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "billingRecords"
+    },
+    "deal": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::deal.deal",
+      "inversedBy": "billingRecords"
+    },
+    "documents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::billing-document.billing-document",
+      "mappedBy": "record"
+    }
+  }
+}

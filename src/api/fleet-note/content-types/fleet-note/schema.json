@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "fleet_notes",
+  "info": {
+    "singularName": "fleet-note",
+    "pluralName": "fleet-notes",
+    "displayName": "Fleet Note",
+    "description": "Notas vinculadas a vehículos de la flota"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "content": {
+      "type": "text",
+      "required": true
+    },
+    "authorDocumentId": {
+      "type": "string",
+      "required": true
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "notes"
+    }
+  }
+}
+

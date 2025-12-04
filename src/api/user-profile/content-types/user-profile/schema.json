@@ -1,0 +1,102 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_profiles",
+  "info": {
+    "singularName": "user-profile",
+    "pluralName": "user-profiles",
+    "displayName": "User Profile",
+    "description": "Perfiles extendidos para los roles internos"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "displayName": {
+      "type": "string",
+      "required": true
+    },
+    "role": {
+      "type": "enumeration",
+      "enum": ["admin", "seller", "driver"],
+      "required": true
+    },
+    "email": {
+      "type": "email"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "department": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "text"
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "clients": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::client.client",
+      "mappedBy": "salesperson"
+    },
+    "appointments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::appointment.appointment",
+      "mappedBy": "assignedTo"
+    },
+    "deals": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::deal.deal",
+      "mappedBy": "seller"
+    },
+    "notifications": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::notification.notification",
+      "mappedBy": "recipient"
+    },
+    "communicationLogs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::communication-log.communication-log",
+      "mappedBy": "owner"
+    },
+    "serviceNotes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service-note.service-note",
+      "mappedBy": "author"
+    },
+    "serviceOrders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service-order.service-order",
+      "mappedBy": "driver"
+    },
+    "inventoryNotes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::inventory-note.inventory-note",
+      "mappedBy": "author"
+    },
+    "assignedVehicles": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::fleet.fleet",
+      "inversedBy": "assignedDrivers"
+    },
+    "userAccount": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user",
+      "private": true
+    }
+  }
+}

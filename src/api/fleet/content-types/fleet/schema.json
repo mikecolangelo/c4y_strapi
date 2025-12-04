@@ -25,11 +25,12 @@
       "type": "decimal",
       "required": true
     },
-    "status": {
+    "condition": {
       "type": "enumeration",
       "enum": ["nuevo", "usado", "seminuevo"],
       "required": true,
-      "default": "nuevo"
+      "default": "nuevo",
+      "columnName": "status"
     },
     "brand": {
       "type": "string",
@@ -66,6 +67,48 @@
     },
     "imageAlt": {
       "type": "string"
+    },
+    "preferredBy": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::client.client",
+      "mappedBy": "preferredVehicle"
+    },
+    "assignedDrivers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::user-profile.user-profile",
+      "mappedBy": "assignedVehicles"
+    },
+    "deals": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::deal.deal",
+      "mappedBy": "vehicle"
+    },
+    "appointments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::appointment.appointment",
+      "mappedBy": "vehicle"
+    },
+    "billingRecords": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::billing-record.billing-record",
+      "mappedBy": "vehicle"
+    },
+    "serviceOrders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service-order.service-order",
+      "mappedBy": "vehicle"
+    },
+    "notes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::fleet-note.fleet-note",
+      "mappedBy": "vehicle"
     }
   }
 }
