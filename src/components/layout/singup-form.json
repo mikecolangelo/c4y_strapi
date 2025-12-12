@@ -12,6 +12,14 @@
       "repeatable": false,
       "required": true
     },
+    "fullname_label": {
+      "type": "string",
+      "required": true
+    },
+    "fullname_placeholder": {
+      "type": "string",
+      "required": true
+    },
     "username_label": {
       "type": "string",
       "required": true

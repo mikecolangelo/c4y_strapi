@@ -33,6 +33,36 @@
     "bio": {
       "type": "text"
     },
+    "address": {
+      "type": "text"
+    },
+    "dateOfBirth": {
+      "type": "date"
+    },
+    "hireDate": {
+      "type": "date"
+    },
+    "identificationNumber": {
+      "type": "string"
+    },
+    "emergencyContactName": {
+      "type": "string"
+    },
+    "emergencyContactPhone": {
+      "type": "string"
+    },
+    "linkedin": {
+      "type": "string"
+    },
+    "workSchedule": {
+      "type": "string"
+    },
+    "specialties": {
+      "type": "text"
+    },
+    "driverLicense": {
+      "type": "string"
+    },
     "avatar": {
       "type": "media",
       "multiple": false,
@@ -92,11 +122,23 @@
       "target": "api::fleet.fleet",
       "inversedBy": "assignedDrivers"
     },
+    "interestedVehicles": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::fleet.fleet",
+      "inversedBy": "interestedDrivers"
+    },
     "userAccount": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "admin::user",
       "private": true
+    },
+    "assignedReminders": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::fleet-reminder.fleet-reminder",
+      "inversedBy": "assignedUsers"
     }
   }
 }

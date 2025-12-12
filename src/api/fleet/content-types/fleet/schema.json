@@ -80,6 +80,27 @@
       "target": "api::user-profile.user-profile",
       "mappedBy": "assignedVehicles"
     },
+    "responsables": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::user-profile.user-profile"
+    },
+    "interestedDrivers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::user-profile.user-profile"
+    },
+    "stockQuantity": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "nextMaintenanceDate": {
+      "type": "date"
+    },
+    "placa": {
+      "type": "string"
+    },
     "deals": {
       "type": "relation",
       "relation": "oneToMany",
@@ -109,6 +130,29 @@
       "relation": "oneToMany",
       "target": "api::fleet-note.fleet-note",
       "mappedBy": "vehicle"
+    },
+    "statuses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::fleet-status.fleet-status",
+      "mappedBy": "vehicle"
+    },
+    "documents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::fleet-document.fleet-document",
+      "mappedBy": "vehicle"
+    },
+    "reminders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::fleet-reminder.fleet-reminder",
+      "mappedBy": "vehicle"
+    },
+    "interestedPersons": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::client.client"
     }
   }
 }

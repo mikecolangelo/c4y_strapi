@@ -52,6 +52,11 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::billing-record.billing-record"
+    },
+    "fleetReminder": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet-reminder.fleet-reminder"
     }
   }
 }

@@ -1,0 +1,77 @@
+{
+  "kind": "collectionType",
+  "collectionName": "fleet_reminders",
+  "info": {
+    "singularName": "fleet-reminder",
+    "pluralName": "fleet-reminders",
+    "displayName": "Fleet Reminder",
+    "description": "Recordatorios para vehículos (únicos o recurrentes)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": false
+    },
+    "reminderType": {
+      "type": "enumeration",
+      "enum": ["unique", "recurring"],
+      "required": true,
+      "default": "unique"
+    },
+    "scheduledDate": {
+      "type": "datetime",
+      "required": true
+    },
+    "recurrencePattern": {
+      "type": "enumeration",
+      "enum": ["daily", "weekly", "biweekly", "monthly", "yearly"],
+      "required": false
+    },
+    "recurrenceEndDate": {
+      "type": "datetime",
+      "required": false
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "isCompleted": {
+      "type": "boolean",
+      "default": false,
+      "required": false
+    },
+    "lastTriggered": {
+      "type": "datetime",
+      "required": false
+    },
+    "nextTrigger": {
+      "type": "datetime",
+      "required": true
+    },
+    "authorDocumentId": {
+      "type": "string",
+      "required": true
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "reminders"
+    },
+    "assignedUsers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::user-profile.user-profile",
+      "mappedBy": "assignedReminders"
+    }
+  }
+}

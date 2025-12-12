@@ -70,6 +70,8 @@ export interface LayoutSingupForm extends Struct.ComponentSchema {
   attributes: {
     email_label: Schema.Attribute.String & Schema.Attribute.Required;
     email_placeholder: Schema.Attribute.String & Schema.Attribute.Required;
+    fullname_label: Schema.Attribute.String & Schema.Attribute.Required;
+    fullname_placeholder: Schema.Attribute.String & Schema.Attribute.Required;
     header: Schema.Attribute.Component<'layout.header-section', false> &
       Schema.Attribute.Required;
     password_label: Schema.Attribute.String & Schema.Attribute.Required;

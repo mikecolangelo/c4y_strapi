@@ -46,7 +46,10 @@ export default {
    *
    * This gives you an opportunity to extend code.
    */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
+  register({ strapi }: { strapi: Core.Strapi }) {
+    // La creación automática de user-profile se maneja en la extensión del plugin users-permissions
+    // Ver: src/extensions/users-permissions/controllers/auth.js
+  },
 
   /**
    * An asynchronous bootstrap function that runs before
