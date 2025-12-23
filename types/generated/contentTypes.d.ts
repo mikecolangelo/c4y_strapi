@@ -1091,6 +1091,10 @@ export interface ApiFleetFleet extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    currentDrivers: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::user-profile.user-profile'
+    >;
     deals: Schema.Attribute.Relation<'oneToMany', 'api::deal.deal'>;
     documents: Schema.Attribute.Relation<
       'oneToMany',
@@ -1121,6 +1125,10 @@ export interface ApiFleetFleet extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String & Schema.Attribute.Required;
     nextMaintenanceDate: Schema.Attribute.Date;
     notes: Schema.Attribute.Relation<'oneToMany', 'api::fleet-note.fleet-note'>;
+    notifications: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::notification.notification'
+    >;
     placa: Schema.Attribute.String;
     preferredBy: Schema.Attribute.Relation<'oneToOne', 'api::client.client'>;
     price: Schema.Attribute.Decimal & Schema.Attribute.Required;
@@ -1265,6 +1273,7 @@ export interface ApiNotificationNotification
   extends Struct.CollectionTypeSchema {
   collectionName: 'notifications';
   info: {
+    description: 'Tabla principal para todas las notificaciones y recordatorios del sistema';
     displayName: 'Notification';
     pluralName: 'notifications';
     singularName: 'notification';
@@ -1273,6 +1282,15 @@ export interface ApiNotificationNotification
     draftAndPublish: false;
   };
   attributes: {
+    assignedUsers: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::user-profile.user-profile'
+    >;
+    author: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::user-profile.user-profile'
+    >;
+    authorDocumentId: Schema.Attribute.String;
     billingRecord: Schema.Attribute.Relation<
       'manyToOne',
       'api::billing-record.billing-record'
@@ -1287,18 +1305,33 @@ export interface ApiNotificationNotification
       'manyToOne',
       'api::fleet-reminder.fleet-reminder'
     >;
+    fleetVehicle: Schema.Attribute.Relation<'manyToOne', 'api::fleet.fleet'>;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    isCompleted: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isRead: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    lastTriggered: Schema.Attribute.DateTime;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::notification.notification'
     > &
       Schema.Attribute.Private;
+    module: Schema.Attribute.Enumeration<
+      ['fleet', 'inventory', 'billing', 'deal', 'client', 'service']
+    >;
+    nextTrigger: Schema.Attribute.DateTime;
     publishedAt: Schema.Attribute.DateTime;
     recipient: Schema.Attribute.Relation<
       'manyToOne',
       'api::user-profile.user-profile'
     >;
+    recurrenceEndDate: Schema.Attribute.DateTime;
+    recurrencePattern: Schema.Attribute.Enumeration<
+      ['daily', 'weekly', 'biweekly', 'monthly', 'yearly']
+    >;
+    reminderType: Schema.Attribute.Enumeration<['unique', 'recurring']>;
+    scheduledDate: Schema.Attribute.DateTime;
+    tags: Schema.Attribute.JSON;
     timestamp: Schema.Attribute.DateTime & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     type: Schema.Attribute.Enumeration<
@@ -1565,6 +1598,10 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
     appointments: Schema.Attribute.Relation<
       'oneToMany',
       'api::appointment.appointment'
+    >;
+    assignedNotifications: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::notification.notification'
     >;
     assignedReminders: Schema.Attribute.Relation<
       'manyToMany',

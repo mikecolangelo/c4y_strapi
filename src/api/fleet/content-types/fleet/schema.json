@@ -90,6 +90,12 @@
       "relation": "manyToMany",
       "target": "api::user-profile.user-profile"
     },
+    "currentDrivers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::user-profile.user-profile",
+      "description": "Conductores actuales del vehículo"
+    },
     "stockQuantity": {
       "type": "integer",
       "min": 0,
@@ -148,6 +154,13 @@
       "relation": "oneToMany",
       "target": "api::fleet-reminder.fleet-reminder",
       "mappedBy": "vehicle"
+    },
+    "notifications": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::notification.notification",
+      "mappedBy": "fleetVehicle",
+      "description": "Notificaciones y recordatorios relacionados con este vehículo"
     },
     "interestedPersons": {
       "type": "relation",

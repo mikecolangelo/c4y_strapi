@@ -139,6 +139,13 @@
       "relation": "manyToMany",
       "target": "api::fleet-reminder.fleet-reminder",
       "inversedBy": "assignedUsers"
+    },
+    "assignedNotifications": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::notification.notification",
+      "inversedBy": "assignedUsers",
+      "description": "Notificaciones/recordatorios asignados a este usuario"
     }
   }
 }
