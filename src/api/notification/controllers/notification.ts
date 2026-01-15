@@ -11,14 +11,64 @@ export default factories.createCoreController('api::notification.notification', 
   async create(ctx) {
     const { data } = ctx.request.body;
 
-    // Si es un recordatorio (type='reminder'), aplicar validaciones y lógica especial
-    if (data?.type === 'reminder') {
+    // Log inicial para verificar que el método se ejecuta
+    strapi.log.info('🚀 [notification.create] Método create ejecutado');
+    
+    // Log para depuración
+    strapi.log.info('🔍 [notification.create] Datos recibidos:', {
+      type: data?.type,
+      hasReminderType: !!data?.reminderType,
+      hasModule: !!data?.module,
+      reminderType: data?.reminderType,
+      module: data?.module,
+      title: data?.title,
+      hasRecipient: !!data?.recipient,
+      hasScheduledDate: !!data?.scheduledDate,
+    });
+
+    // Si es un recordatorio completo (type='reminder' Y tiene reminderType o module),
+    // aplicar validaciones y lógica especial
+    // Si solo tiene type='reminder' sin estos campos, tratarlo como notificación manual
+    // Verificar explícitamente que los campos no sean undefined, null o string vacío
+    const reminderTypeValue = data?.reminderType;
+    const moduleValue = data?.module;
+    const hasReminderType = reminderTypeValue !== undefined && 
+                            reminderTypeValue !== null && 
+                            typeof reminderTypeValue === 'string' && 
+                            reminderTypeValue.trim() !== '';
+    const hasModule = moduleValue !== undefined && 
+                      moduleValue !== null && 
+                      typeof moduleValue === 'string' && 
+                      moduleValue.trim() !== '';
+    const isCompleteReminder = data?.type === 'reminder' && (hasReminderType || hasModule);
+    
+    strapi.log.info('🔍 [notification.create] Evaluación de recordatorio completo:', {
+      isCompleteReminder,
+      type: data?.type,
+      typeIsReminder: data?.type === 'reminder',
+      hasReminderType,
+      hasModule,
+      reminderTypeValue: reminderTypeValue,
+      reminderTypeType: typeof reminderTypeValue,
+      moduleValue: moduleValue,
+      moduleType: typeof moduleValue,
+      rawData: JSON.stringify(data),
+    });
+    
+    if (isCompleteReminder) {
+      strapi.log.info('⚠️ [notification.create] Entrando en validación de recordatorio completo');
       // Validaciones básicas
       if (!data?.title || typeof data.title !== 'string' || data.title.trim() === '') {
         return ctx.badRequest('El título es requerido');
       }
 
       if (!data?.scheduledDate) {
+        strapi.log.error('❌ [notification.create] Error: scheduledDate requerido pero no presente', {
+          type: data?.type,
+          reminderType: data?.reminderType,
+          module: data?.module,
+          hasScheduledDate: !!data?.scheduledDate,
+        });
         return ctx.badRequest('La fecha programada es requerida');
       }
 
@@ -84,7 +134,8 @@ export default factories.createCoreController('api::notification.notification', 
     // VERIFICACIÓN FINAL: Antes de crear, verificar una última vez que no existe un duplicado
     // Esto previene condiciones de carrera donde dos peticiones pasan las validaciones anteriores
     // IMPORTANTE: También verificar por vehículo si es módulo fleet
-    if (data?.type === 'reminder' && data?.title && data?.module) {
+    // Solo verificar duplicados para recordatorios completos
+    if (isCompleteReminder && data?.title && data?.module) {
       try {
         const filters: any = {
           type: { $eq: 'reminder' },
@@ -165,8 +216,8 @@ export default factories.createCoreController('api::notification.notification', 
     // Crear la notificación/recordatorio usando el método base
     const result = await super.create(ctx);
 
-    // Si es un recordatorio con usuarios asignados, sincronizar notificaciones individuales
-    if (result?.data && data?.type === 'reminder' && data.assignedUsers && Array.isArray(data.assignedUsers) && data.assignedUsers.length > 0) {
+    // Si es un recordatorio completo con usuarios asignados, sincronizar notificaciones individuales
+    if (result?.data && isCompleteReminder && data.assignedUsers && Array.isArray(data.assignedUsers) && data.assignedUsers.length > 0) {
       try {
         const notificationService = strapi.service('api::notification.notification');
         if (notificationService && typeof notificationService.syncReminderNotifications === 'function') {
