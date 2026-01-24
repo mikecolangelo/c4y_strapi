@@ -666,6 +666,84 @@ export interface ApiCommunicationLogCommunicationLog
   };
 }
 
+export interface ApiCompanyInfoCompanyInfo extends Struct.SingleTypeSchema {
+  collectionName: 'company_infos';
+  info: {
+    description: 'Informaci\u00F3n de la empresa para contratos PDF y documentos legales';
+    displayName: 'Company Info';
+    pluralName: 'company-infos';
+    singularName: 'company-info';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    companyAddress: Schema.Attribute.Text;
+    companyName: Schema.Attribute.String & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email;
+    legalRepMaritalStatus: Schema.Attribute.String;
+    legalRepName: Schema.Attribute.String & Schema.Attribute.Required;
+    legalRepNationality: Schema.Attribute.String;
+    legalRepPassport: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::company-info.company-info'
+    > &
+      Schema.Attribute.Private;
+    logo: Schema.Attribute.Media<'images'>;
+    phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    registryInfo: Schema.Attribute.Text;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiConfigurationConfiguration
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'configurations';
+  info: {
+    description: 'Configuraciones del sistema para APIs externas y par\u00E1metros generales';
+    displayName: 'Configuration';
+    pluralName: 'configurations';
+    singularName: 'configuration';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    category: Schema.Attribute.Enumeration<
+      ['general', 'whatsapp', 'google', 'company', 'billing']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'general'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    isSecret: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    key: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::configuration.configuration'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    value: Schema.Attribute.Text;
+  };
+}
+
 export interface ApiContractDocumentContractDocument
   extends Struct.CollectionTypeSchema {
   collectionName: 'contract_documents';
@@ -2187,6 +2265,8 @@ declare module '@strapi/strapi' {
       'api::billing-record.billing-record': ApiBillingRecordBillingRecord;
       'api::client.client': ApiClientClient;
       'api::communication-log.communication-log': ApiCommunicationLogCommunicationLog;
+      'api::company-info.company-info': ApiCompanyInfoCompanyInfo;
+      'api::configuration.configuration': ApiConfigurationConfiguration;
       'api::contract-document.contract-document': ApiContractDocumentContractDocument;
       'api::dashboard-metric.dashboard-metric': ApiDashboardMetricDashboardMetric;
       'api::dashboard.dashboard': ApiDashboardDashboard;

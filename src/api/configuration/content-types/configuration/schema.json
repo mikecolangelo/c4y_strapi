@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "configurations",
+  "info": {
+    "singularName": "configuration",
+    "pluralName": "configurations",
+    "displayName": "Configuration",
+    "description": "Configuraciones del sistema para APIs externas y parámetros generales"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "key": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "description": "Clave única para identificar la configuración"
+    },
+    "value": {
+      "type": "text",
+      "required": false,
+      "description": "Valor de la configuración"
+    },
+    "description": {
+      "type": "text",
+      "required": false,
+      "description": "Descripción de para qué sirve esta configuración"
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["general", "whatsapp", "google", "company", "billing"],
+      "required": true,
+      "default": "general",
+      "description": "Categoría de la configuración"
+    },
+    "isSecret": {
+      "type": "boolean",
+      "default": false,
+      "required": false,
+      "description": "Indica si el valor es sensible y debe ocultarse"
+    }
+  }
+}
