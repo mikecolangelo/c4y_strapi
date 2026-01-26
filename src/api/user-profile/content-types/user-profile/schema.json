@@ -146,6 +146,12 @@
       "target": "api::notification.notification",
       "inversedBy": "assignedUsers",
       "description": "Notificaciones/recordatorios asignados a este usuario"
+    },
+    "financings": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::financing.financing",
+      "mappedBy": "client"
     }
   }
 }

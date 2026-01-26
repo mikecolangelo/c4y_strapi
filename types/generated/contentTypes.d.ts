@@ -523,6 +523,7 @@ export interface ApiBillingRecordBillingRecord
   extends Struct.CollectionTypeSchema {
   collectionName: 'billing_records';
   info: {
+    description: 'Pago individual dentro de un financiamiento (Pago Hijo)';
     displayName: 'Billing Record';
     pluralName: 'billing-records';
     singularName: 'billing-record';
@@ -531,38 +532,68 @@ export interface ApiBillingRecordBillingRecord
     draftAndPublish: true;
   };
   attributes: {
+    advanceCredit: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     amount: Schema.Attribute.Decimal & Schema.Attribute.Required;
-    client: Schema.Attribute.Relation<'manyToOne', 'api::client.client'>;
+    comments: Schema.Attribute.Text;
+    confirmationNumber: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     currency: Schema.Attribute.String & Schema.Attribute.DefaultTo<'USD'>;
-    deal: Schema.Attribute.Relation<'manyToOne', 'api::deal.deal'>;
+    daysLate: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     documents: Schema.Attribute.Relation<
       'oneToMany',
       'api::billing-document.billing-document'
     >;
-    dueDate: Schema.Attribute.Date;
-    invoiceNumber: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique;
+    dueDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    financing: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::financing.financing'
+    >;
+    lateFeeAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::billing-record.billing-record'
     > &
       Schema.Attribute.Private;
-    notes: Schema.Attribute.Text;
     paymentDate: Schema.Attribute.Date;
     publishedAt: Schema.Attribute.DateTime;
-    remindersSent: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    status: Schema.Attribute.Enumeration<['pagado', 'pendiente', 'retrasado']> &
+    quotaAmountCovered: Schema.Attribute.Decimal;
+    quotaNumber: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 1;
+        },
+        number
+      >;
+    quotasCovered: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<1>;
+    receiptNumber: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    status: Schema.Attribute.Enumeration<
+      ['pagado', 'pendiente', 'adelanto', 'retrasado']
+    > &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'pendiente'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    vehicle: Schema.Attribute.Relation<'manyToOne', 'api::fleet.fleet'>;
+    verifiedAt: Schema.Attribute.DateTime;
+    verifiedBy: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::user-profile.user-profile'
+    >;
+    verifiedInBank: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
   };
 }
 
@@ -578,6 +609,7 @@ export interface ApiClientClient extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    address: Schema.Attribute.Text;
     appointments: Schema.Attribute.Relation<
       'oneToMany',
       'api::appointment.appointment'
@@ -780,6 +812,46 @@ export interface ApiContractDocumentContractDocument
   };
 }
 
+export interface ApiContractTypeContractType
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'contract_types';
+  info: {
+    description: 'Tipos de contrato editables para Car4You';
+    displayName: 'Contract Type';
+    pluralName: 'contract-types';
+    singularName: 'contract-type';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    defaultClauses: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::deal-clause.deal-clause'
+    >;
+    description: Schema.Attribute.Text;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::contract-type.contract-type'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    requiredDocuments: Schema.Attribute.JSON;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiDashboardMetricDashboardMetric
   extends Struct.CollectionTypeSchema {
   collectionName: 'dashboard_metrics';
@@ -935,6 +1007,10 @@ export interface ApiDealDeal extends Struct.CollectionTypeSchema {
       'api::deal-clause.deal-clause'
     >;
     client: Schema.Attribute.Relation<'manyToOne', 'api::client.client'>;
+    contractType: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::contract-type.contract-type'
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -947,13 +1023,17 @@ export interface ApiDealDeal extends Struct.CollectionTypeSchema {
       'api::contract-document.contract-document'
     >;
     generatedAt: Schema.Attribute.Date;
+    initialDeposit: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::deal.deal'> &
       Schema.Attribute.Private;
-    paymentAgreement: Schema.Attribute.Enumeration<['semanal', 'quincenal']> &
+    paymentAgreement: Schema.Attribute.Enumeration<
+      ['semanal', 'quincenal', 'mensual']
+    > &
       Schema.Attribute.DefaultTo<'semanal'>;
     price: Schema.Attribute.Decimal;
     publishedAt: Schema.Attribute.DateTime;
+    quotaAmount: Schema.Attribute.Decimal;
     seller: Schema.Attribute.Relation<
       'manyToOne',
       'api::user-profile.user-profile'
@@ -966,14 +1046,92 @@ export interface ApiDealDeal extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<'pendiente'>;
     summary: Schema.Attribute.Text;
     title: Schema.Attribute.String;
-    type: Schema.Attribute.Enumeration<
-      ['conduccion', 'arrendamiento', 'servicio']
-    > &
-      Schema.Attribute.Required;
+    totalQuotas: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<220>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     vehicle: Schema.Attribute.Relation<'manyToOne', 'api::fleet.fleet'>;
+  };
+}
+
+export interface ApiFinancingFinancing extends Struct.CollectionTypeSchema {
+  collectionName: 'financings';
+  info: {
+    description: 'Plan de financiamiento vehicular (Pago Padre)';
+    displayName: 'Financing';
+    pluralName: 'financings';
+    singularName: 'financing';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    client: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::user-profile.user-profile'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    currentBalance: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    financingMonths: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 120;
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<54>;
+    financingNumber: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    lateFeePercentage: Schema.Attribute.Decimal &
+      Schema.Attribute.DefaultTo<10>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::financing.financing'
+    > &
+      Schema.Attribute.Private;
+    maxLateQuotasAllowed: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<4>;
+    nextDueDate: Schema.Attribute.Date;
+    notes: Schema.Attribute.Text;
+    paidQuotas: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    partialPaymentCredit: Schema.Attribute.Decimal &
+      Schema.Attribute.DefaultTo<0>;
+    paymentFrequency: Schema.Attribute.Enumeration<
+      ['semanal', 'quincenal', 'mensual']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'semanal'>;
+    payments: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::billing-record.billing-record'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    quotaAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    startDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    status: Schema.Attribute.Enumeration<
+      ['activo', 'inactivo', 'en_mora', 'completado']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'activo'>;
+    totalAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    totalLateFees: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    totalPaid: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    totalQuotas: Schema.Attribute.Integer & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    vehicle: Schema.Attribute.Relation<'oneToOne', 'api::fleet.fleet'>;
   };
 }
 
@@ -1157,10 +1315,6 @@ export interface ApiFleetFleet extends Struct.CollectionTypeSchema {
       'manyToMany',
       'api::user-profile.user-profile'
     >;
-    billingRecords: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::billing-record.billing-record'
-    >;
     brand: Schema.Attribute.String & Schema.Attribute.Required;
     color: Schema.Attribute.String;
     condition: Schema.Attribute.Enumeration<['nuevo', 'usado', 'seminuevo']> &
@@ -1177,6 +1331,11 @@ export interface ApiFleetFleet extends Struct.CollectionTypeSchema {
     documents: Schema.Attribute.Relation<
       'oneToMany',
       'api::fleet-document.fleet-document'
+    >;
+    engineNumber: Schema.Attribute.String;
+    financing: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::financing.financing'
     >;
     fuelType: Schema.Attribute.String;
     image: Schema.Attribute.Media<'images'>;
@@ -1207,6 +1366,14 @@ export interface ApiFleetFleet extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::notification.notification'
     >;
+    passengerCapacity: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 50;
+          min: 1;
+        },
+        number
+      >;
     placa: Schema.Attribute.String;
     preferredBy: Schema.Attribute.Relation<'oneToOne', 'api::client.client'>;
     price: Schema.Attribute.Decimal & Schema.Attribute.Required;
@@ -1707,6 +1874,10 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
     email: Schema.Attribute.Email;
     emergencyContactName: Schema.Attribute.String;
     emergencyContactPhone: Schema.Attribute.String;
+    financings: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::financing.financing'
+    >;
     hireDate: Schema.Attribute.Date;
     identificationNumber: Schema.Attribute.String;
     interestedVehicles: Schema.Attribute.Relation<
@@ -2268,11 +2439,13 @@ declare module '@strapi/strapi' {
       'api::company-info.company-info': ApiCompanyInfoCompanyInfo;
       'api::configuration.configuration': ApiConfigurationConfiguration;
       'api::contract-document.contract-document': ApiContractDocumentContractDocument;
+      'api::contract-type.contract-type': ApiContractTypeContractType;
       'api::dashboard-metric.dashboard-metric': ApiDashboardMetricDashboardMetric;
       'api::dashboard.dashboard': ApiDashboardDashboard;
       'api::deal-clause.deal-clause': ApiDealClauseDealClause;
       'api::deal-discount.deal-discount': ApiDealDiscountDealDiscount;
       'api::deal.deal': ApiDealDeal;
+      'api::financing.financing': ApiFinancingFinancing;
       'api::fleet-document.fleet-document': ApiFleetDocumentFleetDocument;
       'api::fleet-note.fleet-note': ApiFleetNoteFleetNote;
       'api::fleet-reminder.fleet-reminder': ApiFleetReminderFleetReminder;

@@ -29,6 +29,10 @@
     "phone": {
       "type": "string"
     },
+    "address": {
+      "type": "text",
+      "description": "Domicilio del cliente para contratos"
+    },
     "leadSince": {
       "type": "date"
     },

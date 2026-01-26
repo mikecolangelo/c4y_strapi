@@ -59,6 +59,16 @@
     "transmission": {
       "type": "string"
     },
+    "passengerCapacity": {
+      "type": "integer",
+      "min": 1,
+      "max": 50,
+      "description": "Capacidad de pasajeros del vehículo"
+    },
+    "engineNumber": {
+      "type": "string",
+      "description": "Número de motor del vehículo"
+    },
     "image": {
       "type": "media",
       "multiple": false,
@@ -119,10 +129,10 @@
       "target": "api::appointment.appointment",
       "mappedBy": "vehicle"
     },
-    "billingRecords": {
+    "financing": {
       "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::billing-record.billing-record",
+      "relation": "oneToOne",
+      "target": "api::financing.financing",
       "mappedBy": "vehicle"
     },
     "serviceOrders": {

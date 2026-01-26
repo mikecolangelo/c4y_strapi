@@ -15,10 +15,11 @@
     "title": {
       "type": "string"
     },
-    "type": {
-      "type": "enumeration",
-      "enum": ["conduccion", "arrendamiento", "servicio"],
-      "required": true
+    "contractType": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::contract-type.contract-type",
+      "description": "Tipo de contrato seleccionado"
     },
     "status": {
       "type": "enumeration",
@@ -37,8 +38,22 @@
     },
     "paymentAgreement": {
       "type": "enumeration",
-      "enum": ["semanal", "quincenal"],
+      "enum": ["semanal", "quincenal", "mensual"],
       "default": "semanal"
+    },
+    "initialDeposit": {
+      "type": "decimal",
+      "default": 0,
+      "description": "Depósito inicial del contrato"
+    },
+    "quotaAmount": {
+      "type": "decimal",
+      "description": "Monto de cada cuota"
+    },
+    "totalQuotas": {
+      "type": "integer",
+      "default": 220,
+      "description": "Número total de cuotas (por defecto 220 semanales)"
     },
     "summary": {
       "type": "text"

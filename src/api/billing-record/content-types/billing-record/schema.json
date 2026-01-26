@@ -4,14 +4,15 @@
   "info": {
     "singularName": "billing-record",
     "pluralName": "billing-records",
-    "displayName": "Billing Record"
+    "displayName": "Billing Record",
+    "description": "Pago individual dentro de un financiamiento (Pago Hijo)"
   },
   "options": {
     "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "invoiceNumber": {
+    "receiptNumber": {
       "type": "string",
       "required": true,
       "unique": true
@@ -26,40 +27,65 @@
     },
     "status": {
       "type": "enumeration",
-      "enum": ["pagado", "pendiente", "retrasado"],
+      "enum": ["pagado", "pendiente", "adelanto", "retrasado"],
       "required": true,
       "default": "pendiente"
     },
+    "quotaNumber": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "quotasCovered": {
+      "type": "integer",
+      "default": 1,
+      "min": 1
+    },
+    "quotaAmountCovered": {
+      "type": "decimal"
+    },
+    "advanceCredit": {
+      "type": "decimal",
+      "default": 0
+    },
+    "lateFeeAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "daysLate": {
+      "type": "integer",
+      "default": 0
+    },
     "dueDate": {
-      "type": "date"
+      "type": "date",
+      "required": true
     },
     "paymentDate": {
       "type": "date"
     },
-    "notes": {
+    "confirmationNumber": {
+      "type": "string"
+    },
+    "verifiedInBank": {
+      "type": "boolean",
+      "default": false
+    },
+    "verifiedBy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile"
+    },
+    "verifiedAt": {
+      "type": "datetime"
+    },
+    "comments": {
       "type": "text"
     },
-    "remindersSent": {
-      "type": "integer",
-      "default": 0
-    },
-    "client": {
+    "financing": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "api::client.client",
-      "inversedBy": "billingRecords"
-    },
-    "vehicle": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::fleet.fleet",
-      "inversedBy": "billingRecords"
-    },
-    "deal": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::deal.deal",
-      "inversedBy": "billingRecords"
+      "target": "api::financing.financing",
+      "inversedBy": "payments"
     },
     "documents": {
       "type": "relation",
