@@ -1899,6 +1899,7 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::notification.notification'
     >;
+    password: Schema.Attribute.Password & Schema.Attribute.Private;
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     role: Schema.Attribute.Enumeration<['admin', 'seller', 'driver']> &
