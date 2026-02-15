@@ -27,7 +27,7 @@
     },
     "status": {
       "type": "enumeration",
-      "enum": ["pagado", "pendiente", "adelanto", "retrasado"],
+      "enum": ["pagado", "pendiente", "adelanto", "retrasado", "abonado"],
       "required": true,
       "default": "pendiente"
     },
@@ -47,6 +47,11 @@
     "advanceCredit": {
       "type": "decimal",
       "default": 0
+    },
+    "remainingQuotaBalance": {
+      "type": "decimal",
+      "default": 0,
+      "description": "Saldo pendiente por pagar de la cuota actual (diferente de advanceCredit que es crédito para futuras cuotas)"
     },
     "lateFeeAmount": {
       "type": "decimal",
@@ -92,6 +97,10 @@
       "relation": "oneToMany",
       "target": "api::billing-document.billing-document",
       "mappedBy": "record"
+    },
+    "isSimulated": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

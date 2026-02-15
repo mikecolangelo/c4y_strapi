@@ -79,6 +79,10 @@
       "type": "decimal",
       "default": 0
     },
+    "lateQuotasCount": {
+      "type": "integer",
+      "default": 0
+    },
     "partialPaymentCredit": {
       "type": "decimal",
       "default": 0
@@ -102,6 +106,12 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::billing-record.billing-record",
+      "mappedBy": "financing"
+    },
+    "invoices": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::invoice.invoice",
       "mappedBy": "financing"
     }
   }

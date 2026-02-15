@@ -50,15 +50,17 @@ const processPaymentData = (data: BillingRecordData): Partial<BillingRecordData>
   const updates: Partial<BillingRecordData> = {};
   
   // Calcular días de retraso si hay fecha de vencimiento
-  if (data.dueDate) {
+  // Solo calcular si no viene un valor explícito de daysLate
+  if (data.dueDate && data.daysLate === undefined) {
     const daysLate = calculateDaysLate(data.dueDate, data.paymentDate);
     updates.daysLate = daysLate;
     
     // Si hay retraso, calcular multa
-    if (daysLate > 0 && data.status === 'retrasado') {
+    // Solo calcular si no viene un valor explícito de lateFeeAmount
+    if (daysLate > 0 && data.status === 'retrasado' && data.lateFeeAmount === undefined) {
       const pendingAmount = data.quotaAmountCovered || data.amount || 0;
       updates.lateFeeAmount = calculateLateFee(pendingAmount, daysLate);
-    } else {
+    } else if (data.lateFeeAmount === undefined) {
       updates.lateFeeAmount = 0;
     }
   }

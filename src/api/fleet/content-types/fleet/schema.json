@@ -176,6 +176,10 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::client.client"
+    },
+    "billingInitials": {
+      "type": "string",
+      "description": "Siglas para facturación (ej: FM para Ford Mustang). Se calcula automáticamente si está vacío."
     }
   }
 }

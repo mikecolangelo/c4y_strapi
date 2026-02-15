@@ -550,6 +550,7 @@ export interface ApiBillingRecordBillingRecord
       'manyToOne',
       'api::financing.financing'
     >;
+    isSimulated: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     lateFeeAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -579,8 +580,10 @@ export interface ApiBillingRecordBillingRecord
     receiptNumber: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
+    remainingQuotaBalance: Schema.Attribute.Decimal &
+      Schema.Attribute.DefaultTo<0>;
     status: Schema.Attribute.Enumeration<
-      ['pagado', 'pendiente', 'adelanto', 'retrasado']
+      ['pagado', 'pendiente', 'adelanto', 'retrasado', 'abonado']
     > &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'pendiente'>;
@@ -1086,8 +1089,10 @@ export interface ApiFinancingFinancing extends Struct.CollectionTypeSchema {
     financingNumber: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
+    invoices: Schema.Attribute.Relation<'oneToMany', 'api::invoice.invoice'>;
     lateFeePercentage: Schema.Attribute.Decimal &
       Schema.Attribute.DefaultTo<10>;
+    lateQuotasCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1315,6 +1320,7 @@ export interface ApiFleetFleet extends Struct.CollectionTypeSchema {
       'manyToMany',
       'api::user-profile.user-profile'
     >;
+    billingInitials: Schema.Attribute.String;
     brand: Schema.Attribute.String & Schema.Attribute.Required;
     color: Schema.Attribute.String;
     condition: Schema.Attribute.Enumeration<['nuevo', 'usado', 'seminuevo']> &
@@ -1508,6 +1514,68 @@ export interface ApiInventoryNoteInventoryNote
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiInvoiceInvoice extends Struct.CollectionTypeSchema {
+  collectionName: 'invoices';
+  info: {
+    description: 'Facturas de financiamiento generadas autom\u00E1ticamente';
+    displayName: 'Invoice';
+    pluralName: 'invoices';
+    singularName: 'invoice';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    billingDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    client: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::user-profile.user-profile'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dueDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    financing: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::financing.financing'
+    >;
+    invoiceNumber: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    isSimulated: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::invoice.invoice'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    paymentDate: Schema.Attribute.Date;
+    paymentMethod: Schema.Attribute.Enumeration<
+      ['cash', 'card', 'transfer', 'yappy', 'otros']
+    >;
+    penaltyAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    publishedAt: Schema.Attribute.DateTime;
+    quotaNumber: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 1;
+        },
+        number
+      >;
+    status: Schema.Attribute.Enumeration<
+      ['pending', 'overdue', 'paid', 'cancelled']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    totalAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2454,6 +2522,7 @@ declare module '@strapi/strapi' {
       'api::fleet.fleet': ApiFleetFleet;
       'api::inventory-item.inventory-item': ApiInventoryItemInventoryItem;
       'api::inventory-note.inventory-note': ApiInventoryNoteInventoryNote;
+      'api::invoice.invoice': ApiInvoiceInvoice;
       'api::notification.notification': ApiNotificationNotification;
       'api::service-note.service-note': ApiServiceNoteServiceNote;
       'api::service-order.service-order': ApiServiceOrderServiceOrder;
