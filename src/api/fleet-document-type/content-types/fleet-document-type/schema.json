@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "fleet_document_types",
+  "info": {
+    "singularName": "fleet-document-type",
+    "pluralName": "fleet-document-types",
+    "displayName": "Tipo de Documento de Vehículo",
+    "description": "Tipos de documentos disponibles para los vehículos"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "documents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::fleet-document.fleet-document",
+      "mappedBy": "documentType"
+    }
+  }
+}

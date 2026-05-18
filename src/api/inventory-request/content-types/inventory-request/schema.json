@@ -1,0 +1,70 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventory_requests",
+  "info": {
+    "singularName": "inventory-request",
+    "pluralName": "inventory-requests",
+    "displayName": "Inventory Request",
+    "description": "Solicitudes de piezas de inventario por parte de usuarios"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "requestNumber": {
+      "type": "string",
+      "unique": true
+    },
+    "quantity": {
+      "type": "float",
+      "required": true,
+      "min": 0.01,
+      "default": 1
+    },
+    "unit": {
+      "type": "string"
+    },
+    "justification": {
+      "type": "text",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pendiente", "aprobado", "rechazado", "entregado", "cancelado"],
+      "required": true,
+      "default": "pendiente"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "requestedAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "approvedAt": {
+      "type": "datetime"
+    },
+    "deliveredAt": {
+      "type": "datetime"
+    },
+    "requester": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "inventoryRequests"
+    },
+    "approvedBy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "approvedInventoryRequests"
+    },
+    "inventoryItem": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::inventory-item.inventory-item",
+      "inversedBy": "inventoryRequests"
+    }
+  }
+}

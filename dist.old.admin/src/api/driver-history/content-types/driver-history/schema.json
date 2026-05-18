@@ -1,0 +1,60 @@
+{
+    "kind": "collectionType",
+    "collectionName": "driver_histories",
+    "info": {
+        "singularName": "driver-history",
+        "pluralName": "driver-histories",
+        "displayName": "Driver History",
+        "description": "Historial de conductores asignados a vehículos"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "driver": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::user-profile.user-profile",
+            "inversedBy": "driverHistories",
+            "description": "Conductor asignado al vehículo"
+        },
+        "vehicle": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::fleet.fleet",
+            "inversedBy": "driverHistory",
+            "description": "Vehículo asignado"
+        },
+        "startDate": {
+            "type": "date",
+            "required": true,
+            "description": "Fecha de inicio como conductor"
+        },
+        "endDate": {
+            "type": "date",
+            "description": "Fecha de fin como conductor (vacío si es conductor actual)"
+        },
+        "status": {
+            "type": "enumeration",
+            "enum": ["active", "completed", "suspended"],
+            "default": "active",
+            "required": true,
+            "description": "Estado de la asignación"
+        },
+        "notes": {
+            "type": "text",
+            "description": "Notas sobre la asignación"
+        },
+        "mileageStart": {
+            "type": "decimal",
+            "min": 0,
+            "description": "Kilometraje al inicio de la asignación"
+        },
+        "mileageEnd": {
+            "type": "decimal",
+            "min": 0,
+            "description": "Kilometraje al final de la asignación"
+        }
+    }
+}

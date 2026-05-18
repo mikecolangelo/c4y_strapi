@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventory_movements",
+  "info": {
+    "singularName": "inventory-movement",
+    "pluralName": "inventory-movements",
+    "displayName": "Inventory Movement",
+    "description": "Log de auditoría de movimientos de inventario (entradas, salidas, ajustes, reversiones)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "type": {
+      "type": "enumeration",
+      "enum": ["entrada", "salida", "ajuste", "reversion"],
+      "required": true,
+      "default": "salida"
+    },
+    "quantity": {
+      "type": "float",
+      "required": true,
+      "min": 0
+    },
+    "reason": {
+      "type": "string"
+    },
+    "date": {
+      "type": "datetime",
+      "required": true
+    },
+    "inventoryItem": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::inventory-item.inventory-item",
+      "inversedBy": "inventoryMovements"
+    },
+    "serviceOrder": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service-order.service-order",
+      "inversedBy": "inventoryMovements"
+    },
+    "performedBy": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    }
+  }
+}

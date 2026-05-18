@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "maintenance_kit_items",
+  "info": {
+    "singularName": "maintenance-kit-item",
+    "pluralName": "maintenance-kit-items",
+    "displayName": "Maintenance Kit Item",
+    "description": "Líneas de repuestos dentro de un kit de mantenimiento"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "quantity": {
+      "type": "float",
+      "required": true,
+      "min": 0.01
+    },
+    "inventoryItem": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::inventory-item.inventory-item",
+      "inversedBy": "maintenanceKitItems"
+    },
+    "maintenanceKit": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::maintenance-kit.maintenance-kit",
+      "inversedBy": "kitItems"
+    }
+  }
+}

@@ -1,0 +1,206 @@
+{
+    "kind": "collectionType",
+    "collectionName": "notifications",
+    "info": {
+        "singularName": "notification",
+        "pluralName": "notifications",
+        "displayName": "Notification",
+        "description": "Tabla principal para todas las notificaciones y recordatorios del sistema"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "title": {
+            "type": "string",
+            "required": true
+        },
+        "description": {
+            "type": "text"
+        },
+        "type": {
+            "type": "enumeration",
+            "enum": ["lead", "sale", "reminder", "payment", "inventory", "oil_change_reminder", "announcement", "appointment_created", "appointment_cancelled", "appointment_rescheduled", "appointment_updated"],
+            "required": true
+        },
+        "module": {
+            "type": "enumeration",
+            "enum": ["fleet", "inventory", "billing", "deal", "client", "service", "calendar"],
+            "required": false,
+            "description": "Módulo al que pertenece esta notificación/recordatorio"
+        },
+        "tags": {
+            "type": "json",
+            "required": false,
+            "description": "Etiquetas para categorizar y filtrar notificaciones"
+        },
+        "isRead": {
+            "type": "boolean",
+            "default": false
+        },
+        "timestamp": {
+            "type": "datetime",
+            "required": true
+        },
+        "reminderType": {
+            "type": "enumeration",
+            "enum": ["unique", "recurring"],
+            "required": false,
+            "description": "Tipo de recordatorio (solo para type='reminder')"
+        },
+        "scheduledDate": {
+            "type": "datetime",
+            "required": false,
+            "description": "Fecha programada del recordatorio"
+        },
+        "recurrencePattern": {
+            "type": "enumeration",
+            "enum": ["daily", "weekly", "biweekly", "monthly", "yearly"],
+            "required": false,
+            "description": "Patrón de recurrencia (solo para reminderType='recurring')"
+        },
+        "recurrenceEndDate": {
+            "type": "datetime",
+            "required": false,
+            "description": "Fecha de fin de recurrencia (opcional)"
+        },
+        "isActive": {
+            "type": "boolean",
+            "default": true,
+            "required": false,
+            "description": "Indica si el recordatorio está activo"
+        },
+        "isCompleted": {
+            "type": "boolean",
+            "default": false,
+            "required": false,
+            "description": "Indica si el recordatorio está completado"
+        },
+        "lastTriggered": {
+            "type": "datetime",
+            "required": false,
+            "description": "Última vez que se activó el recordatorio"
+        },
+        "nextTrigger": {
+            "type": "datetime",
+            "required": false,
+            "description": "Próxima fecha de activación del recordatorio"
+        },
+        "authorDocumentId": {
+            "type": "string",
+            "required": false,
+            "description": "DocumentId del autor del recordatorio"
+        },
+        "recipient": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::user-profile.user-profile",
+            "inversedBy": "notifications"
+        },
+        "assignedUsers": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::user-profile.user-profile",
+            "mappedBy": "assignedNotifications",
+            "description": "Usuarios asignados al recordatorio (para type='reminder')"
+        },
+        "author": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::user-profile.user-profile",
+            "description": "Autor del recordatorio"
+        },
+        "fleetVehicle": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::fleet.fleet",
+            "inversedBy": "notifications",
+            "description": "Vehículo relacionado (para module='fleet')"
+        },
+        "client": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::client.client",
+            "inversedBy": "notifications"
+        },
+        "deal": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::deal.deal"
+        },
+        "billingRecord": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::billing-record.billing-record"
+        },
+        "fleetReminder": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::fleet-reminder.fleet-reminder",
+            "description": "Relación legacy con fleet-reminder (deprecated, usar fleetVehicle + module='fleet')"
+        },
+        "appointment": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::appointment.appointment",
+            "inversedBy": "notifications",
+            "description": "Cita relacionada (para notificaciones del módulo de calendario)"
+        },
+        "durationDays": {
+            "type": "integer",
+            "min": 1,
+            "max": 365,
+            "default": 7,
+            "required": false,
+            "description": "Duración de la notificación en días (por defecto 7 días)"
+        },
+        "isPinned": {
+            "type": "boolean",
+            "default": false,
+            "required": false,
+            "description": "Indica si la notificación está fijada (no se puede descartar fácilmente)"
+        },
+        "expiresAt": {
+            "type": "datetime",
+            "required": false,
+            "description": "Fecha de expiración de la notificación (calculada automáticamente)"
+        },
+        "isDismissible": {
+            "type": "boolean",
+            "default": true,
+            "required": false,
+            "description": "Indica si el usuario puede descartar la notificación"
+        },
+        "images": {
+            "type": "media",
+            "multiple": true,
+            "required": false,
+            "allowedTypes": ["images"],
+            "description": "Imágenes para anuncios (usado cuando type='announcement')"
+        },
+        "targetAudience": {
+            "type": "enumeration",
+            "enum": ["all", "drivers", "sellers", "admins"],
+            "default": "all",
+            "required": false,
+            "description": "Audiencia objetivo del anuncio (usado cuando type='announcement')"
+        },
+        "isActive": {
+            "type": "boolean",
+            "default": true,
+            "required": false,
+            "description": "Indica si el anuncio está activo y visible"
+        },
+        "startDate": {
+            "type": "datetime",
+            "required": false,
+            "description": "Fecha de inicio de visibilidad del anuncio"
+        },
+        "endDate": {
+            "type": "datetime",
+            "required": false,
+            "description": "Fecha de fin de visibilidad del anuncio"
+        }
+    }
+}

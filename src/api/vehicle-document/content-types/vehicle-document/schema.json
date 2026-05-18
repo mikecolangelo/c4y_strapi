@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vehicle_documents",
+  "info": {
+    "singularName": "vehicle-document",
+    "pluralName": "vehicle-documents",
+    "displayName": "Documento Vehicular",
+    "description": "Documentos y evidencia fotográfica de un vehículo específico"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "vehicleDocumentId": {
+      "type": "string",
+      "required": true
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::vehicle-document-category.vehicle-document-category",
+      "required": true
+    },
+    "files": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["files", "images"]
+    },
+    "photos": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "expirationDate": {
+      "type": "date"
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}

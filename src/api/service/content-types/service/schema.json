@@ -1,0 +1,78 @@
+{
+  "kind": "collectionType",
+  "collectionName": "services",
+  "info": {
+    "singularName": "service",
+    "pluralName": "services",
+    "displayName": "Service",
+    "description": "Catálogo de servicios y mantenimientos"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "price": {
+      "type": "decimal",
+      "default": "0"
+    },
+    "basePrice": {
+      "type": "decimal",
+      "default": 0
+    },
+    "agencyCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "coverage": {
+      "type": "enumeration",
+      "enum": ["cliente", "empresa"],
+      "required": true,
+      "default": "cliente"
+    },
+    "category": {
+      "type": "string"
+    },
+    "durationMinutes": {
+      "type": "integer"
+    },
+    "description": {
+      "type": "text"
+    },
+    "isFree": {
+      "type": "boolean",
+      "default": false
+    },
+    "orders": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service-order.service-order",
+      "mappedBy": "services"
+    },
+    "notes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service-note.service-note",
+      "mappedBy": "service"
+    },
+    "appointments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::appointment.appointment",
+      "mappedBy": "service"
+    },
+    "maintenanceKits": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::maintenance-kit.maintenance-kit",
+      "mappedBy": "service"
+    },
+    "defaultTemplate": {
+      "type": "json"
+    }
+  }
+}

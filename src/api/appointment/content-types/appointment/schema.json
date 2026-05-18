@@ -1,0 +1,114 @@
+{
+  "kind": "collectionType",
+  "collectionName": "appointments",
+  "info": {
+    "singularName": "appointment",
+    "pluralName": "appointments",
+    "displayName": "Appointment"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["venta", "prueba", "mantenimiento"],
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["confirmada", "pendiente", "cancelada"],
+      "required": true,
+      "default": "pendiente"
+    },
+    "scheduledAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "durationMinutes": {
+      "type": "integer"
+    },
+    "description": {
+      "type": "text"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "location": {
+      "type": "string"
+    },
+    "contactPhone": {
+      "type": "string"
+    },
+    "contactEmail": {
+      "type": "email"
+    },
+    "isAllDay": {
+      "type": "boolean",
+      "default": false
+    },
+    "frequency": {
+      "type": "enumeration",
+      "enum": ["unica", "semanal", "quincenal", "mensual"],
+      "default": "unica",
+      "required": true
+    },
+    "clientName": {
+      "type": "string"
+    },
+    "clientPhone": {
+      "type": "string"
+    },
+    "clientEmail": {
+      "type": "email"
+    },
+    "owner": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "appointments"
+    },
+    "service": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service.service",
+      "inversedBy": "appointments"
+    },
+    "assignedTo": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "appointments"
+    },
+    "parentAppointment": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::appointment.appointment",
+      "inversedBy": "childAppointments"
+    },
+    "childAppointments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::appointment.appointment",
+      "mappedBy": "parentAppointment"
+    },
+    "serviceOrder": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service-order.service-order",
+      "inversedBy": "appointment"
+    }
+  }
+}

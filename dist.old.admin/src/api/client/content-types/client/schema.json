@@ -1,0 +1,91 @@
+{
+    "kind": "collectionType",
+    "collectionName": "clients",
+    "info": {
+        "singularName": "client",
+        "pluralName": "clients",
+        "displayName": "Client",
+        "description": "Contactos y clientes gestionados en la plataforma"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "fullName": {
+            "type": "string",
+            "required": true
+        },
+        "status": {
+            "type": "enumeration",
+            "enum": ["lead", "activo", "vip"],
+            "default": "lead",
+            "required": true
+        },
+        "email": {
+            "type": "email",
+            "unique": false
+        },
+        "phone": {
+            "type": "string"
+        },
+        "address": {
+            "type": "text",
+            "description": "Domicilio del cliente para contratos"
+        },
+        "leadSince": {
+            "type": "date"
+        },
+        "avatar": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": ["images"]
+        },
+        "notes": {
+            "type": "text"
+        },
+        "preferredVehicle": {
+            "type": "relation",
+            "relation": "oneToOne",
+            "target": "api::fleet.fleet",
+            "inversedBy": "preferredBy"
+        },
+        "salesperson": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::user-profile.user-profile",
+            "inversedBy": "clients"
+        },
+        "deals": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::deal.deal",
+            "mappedBy": "client"
+        },
+        "appointments": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::appointment.appointment",
+            "mappedBy": "client"
+        },
+        "billingRecords": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::billing-record.billing-record",
+            "mappedBy": "client"
+        },
+        "notifications": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::notification.notification",
+            "mappedBy": "client"
+        },
+        "communicationLogs": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::communication-log.communication-log",
+            "mappedBy": "client"
+        }
+    }
+}

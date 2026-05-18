@@ -1,0 +1,36 @@
+{
+    "kind": "collectionType",
+    "collectionName": "fleet_statuses",
+    "info": {
+        "singularName": "fleet-status",
+        "pluralName": "fleet-statuses",
+        "displayName": "Fleet Status",
+        "description": "Estados del vehículo con imágenes para seguimiento del estado al momento de entregarlo"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "comment": {
+            "type": "text",
+            "required": false
+        },
+        "images": {
+            "type": "media",
+            "multiple": true,
+            "required": false,
+            "allowedTypes": ["images"]
+        },
+        "authorDocumentId": {
+            "type": "string",
+            "required": true
+        },
+        "vehicle": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::fleet.fleet",
+            "inversedBy": "statuses"
+        }
+    }
+}

@@ -1,0 +1,95 @@
+{
+  "kind": "collectionType",
+  "collectionName": "weekly_collections",
+  "info": {
+    "singularName": "weekly-collection",
+    "pluralName": "weekly-collections",
+    "displayName": "Cobranza Semanal",
+    "description": "Registros de cobranza semanal importados masivamente desde Excel/CSV"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "weekNumber": {
+      "type": "integer",
+      "description": "No. / SEMANA"
+    },
+    "receiptDate": {
+      "type": "date",
+      "description": "FECHA DE RECIBO"
+    },
+    "receiptNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "description": "# RECIBO"
+    },
+    "paymentDate": {
+      "type": "date",
+      "description": "FECHA DE PAGO"
+    },
+    "confirmationNumber": {
+      "type": "string",
+      "description": "# DE CONFIRMACION"
+    },
+    "weeklyQuota": {
+      "type": "decimal",
+      "description": "LETRA $225.00 SEMANAL"
+    },
+    "initialDeposit": {
+      "type": "decimal",
+      "description": "ARREGLOS DE DEPOSITO INICIAL"
+    },
+    "lateFee": {
+      "type": "decimal",
+      "description": "MULTA POR ATRASO"
+    },
+    "amountPaid": {
+      "type": "decimal",
+      "description": "PAGOS"
+    },
+    "remainingBalance": {
+      "type": "decimal",
+      "description": "SALDO"
+    },
+    "verifiedInBank": {
+      "type": "boolean",
+      "default": false,
+      "description": "VERIFICADO EN BANCO"
+    },
+    "clientIdentification": {
+      "type": "string",
+      "description": "Cedula o ID del cliente para vinculacion"
+    },
+    "clientName": {
+      "type": "string",
+      "description": "Nombre del cliente tal como viene en el Excel"
+    },
+    "financing": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::financing.financing"
+    },
+    "client": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile"
+    },
+    "importBatch": {
+      "type": "string",
+      "description": "Identificador del lote de importacion"
+    },
+    "importStatus": {
+      "type": "enumeration",
+      "enum": ["pending", "processed", "error", "duplicate"],
+      "default": "pending",
+      "description": "Estado del registro tras la importacion"
+    },
+    "importError": {
+      "type": "text",
+      "description": "Mensaje de error si fallo la importacion"
+    }
+  }
+}

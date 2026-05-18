@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contract_types",
+  "info": {
+    "singularName": "contract-type",
+    "pluralName": "contract-types",
+    "displayName": "Contract Type",
+    "description": "Tipos de contrato editables para Car4You"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "description": "Nombre del tipo de contrato"
+    },
+    "description": {
+      "type": "text",
+      "required": false,
+      "description": "Descripción del tipo de contrato"
+    },
+    "requiredDocuments": {
+      "type": "json",
+      "required": false,
+      "description": "Lista de documentos requeridos para este tipo de contrato"
+    },
+    "defaultClauses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::deal-clause.deal-clause",
+      "description": "Cláusulas por defecto para este tipo de contrato"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0,
+      "required": false,
+      "description": "Orden de visualización"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true,
+      "required": false,
+      "description": "Indica si el tipo de contrato está activo"
+    }
+  }
+}

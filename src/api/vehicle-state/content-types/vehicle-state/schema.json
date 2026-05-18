@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vehicle_states",
+  "info": {
+    "singularName": "vehicle-state",
+    "pluralName": "vehicle-states",
+    "displayName": "Vehicle State",
+    "description": "Estados del vehículo con imágenes y comentarios"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "comment": {
+      "type": "text",
+      "required": false
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "authorDocumentId": {
+      "type": "string",
+      "required": true
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "vehicleStates"
+    }
+  }
+}

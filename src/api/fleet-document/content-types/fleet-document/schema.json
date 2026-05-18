@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "fleet_documents",
+  "info": {
+    "singularName": "fleet-document",
+    "pluralName": "fleet-documents",
+    "displayName": "Fleet Document",
+    "description": "Documentos del vehículo (póliza de seguro, ficha técnica, tarjeta de propiedad, etc.)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "documentType": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet-document-type.fleet-document-type",
+      "inversedBy": "documents",
+      "required": true
+    },
+    "files": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": ["files", "images"]
+    },
+    "authorDocumentId": {
+      "type": "string",
+      "required": true
+    },
+    "otherDescription": {
+      "type": "text",
+      "required": false
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "documents"
+    }
+  }
+}

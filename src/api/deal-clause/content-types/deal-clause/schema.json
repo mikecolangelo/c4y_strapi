@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "deal_clauses",
+  "info": {
+    "singularName": "deal-clause",
+    "pluralName": "deal-clauses",
+    "displayName": "Deal Clause"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "deal": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::deal.deal",
+      "inversedBy": "clauses"
+    }
+  }
+}

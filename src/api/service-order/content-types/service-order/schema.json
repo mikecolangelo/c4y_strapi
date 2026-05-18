@@ -1,0 +1,104 @@
+{
+  "kind": "collectionType",
+  "collectionName": "service_orders",
+  "info": {
+    "singularName": "service-order",
+    "pluralName": "service-orders",
+    "displayName": "Service Order",
+    "description": "Órdenes de servicio y mantenimiento"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "code": {
+      "type": "string",
+      "unique": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "pendiente",
+        "en_progreso",
+        "completado",
+        "cancelado"
+      ],
+      "default": "pendiente",
+      "required": true
+    },
+    "scheduledAt": {
+      "type": "datetime"
+    },
+    "completedAt": {
+      "type": "datetime"
+    },
+    "summary": {
+      "type": "text"
+    },
+    "laborCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "partsCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "taxAmount": {
+      "type": "decimal",
+      "default": 0
+    },
+    "totalCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "serviceOrders"
+    },
+    "driver": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "serviceOrders"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service",
+      "inversedBy": "orders"
+    },
+    "inventoryItems": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::inventory-item.inventory-item",
+      "inversedBy": "serviceOrders"
+    },
+    "notes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service-note.service-note",
+      "mappedBy": "serviceOrder"
+    },
+    "serviceOrderInventoryItems": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service-order-inventory-item.service-order-inventory-item",
+      "mappedBy": "serviceOrder"
+    },
+    "inventoryMovements": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::inventory-movement.inventory-movement",
+      "mappedBy": "serviceOrder"
+    },
+    "appointment": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::appointment.appointment",
+      "mappedBy": "serviceOrder"
+    }
+  }
+}

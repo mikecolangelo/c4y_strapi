@@ -1,0 +1,116 @@
+---
+alwaysApply: true
+---
+
+# Código Minimalista - Backend (Strapi)
+
+## Principios Fundamentales
+
+### 1. Servicios como Capa de Abstracción
+- **Toda la lógica de negocio debe estar en los servicios**, no en los controladores
+- **Los controladores deben ser delgados** - solo reciben requests, llaman a servicios, y devuelven responses
+- **Los servicios encapsulan la lógica reutilizable** y pueden ser llamados desde múltiples lugares
+
+### 2. Procesamiento Automático de Datos
+- **Procesa y transforma datos en los servicios**, no en los controladores
+- **Centraliza la lógica de transformación** en funciones helper dentro de los servicios
+- **Ejemplo**: Si necesitas formatear fechas, calcular campos derivados, o procesar relaciones, hazlo en el servicio
+
+### 3. Funciones Helper Reutilizables
+- **Crea funciones helper dentro de los servicios** para operaciones comunes
+- **Exporta funciones helper compartidas** si se usan en múltiples servicios
+- **Evita duplicar lógica** - si encuentras código repetido, extrae una función helper
+
+### 4. Controladores Minimalistas
+- **Los controladores deben tener solo lo esencial**:
+  - Validación básica de entrada
+  - Llamada al servicio correspondiente
+  - Manejo de errores y respuestas
+- **No deben contener lógica de negocio** - esa lógica va en servicios
+
+## Ejemplos de Buenas Prácticas
+
+### ✅ CORRECTO: Controlador Delgado + Servicio con Lógica
+```typescript
+// controllers/dashboard.ts
+export default createCoreController('api::dashboard.dashboard', ({ strapi }) => ({
+  async find(ctx) {
+    const service = strapi.service('api::dashboard.dashboard');
+    const data = await service.find(ctx.query);
+    return { data };
+  },
+}));
+
+// services/dashboard.ts
+export default createCoreService('api::dashboard.dashboard', ({ strapi }) => ({
+  async find(query) {
+    const entries = await strapi.entityService.findMany('api::dashboard.dashboard', {
+      ...query,
+      populate: this.getPopulateConfig(),
+    });
+    
+    // Procesa los datos aquí
+    return this.processDashboardData(entries);
+  },
+  
+  processDashboardData(data) {
+    // Lógica de procesamiento centralizada
+    // ...
+  },
+  
+  getPopulateConfig() {
+    // Configuración reutilizable
+    // ...
+  },
+}));
+```
+
+### ❌ INCORRECTO: Lógica en Controlador
+```typescript
+// controllers/dashboard.ts
+export default createCoreController('api::dashboard.dashboard', ({ strapi }) => ({
+  async find(ctx) {
+    const entries = await strapi.entityService.findMany('api::dashboard.dashboard', {
+      populate: { /* configuración compleja */ },
+    });
+    
+    // ❌ Lógica de negocio en el controlador
+    const processed = entries.map(entry => ({
+      ...entry,
+      computedField: this.calculateSomething(entry),
+    }));
+    
+    return { data: processed };
+  },
+}));
+```
+
+## Reglas Específicas
+
+1. **Los controladores solo orquestan** - validan entrada, llaman servicios, manejan respuestas
+2. **Toda la lógica de negocio va en servicios** - cálculos, transformaciones, procesamiento
+3. **Crea funciones helper dentro de servicios** para operaciones reutilizables
+4. **Procesa datos en los servicios**, no en los controladores
+5. **Usa `createCoreService` y `createCoreController`** para mantener consistencia con Strapi
+
+## Estructura Recomendada
+
+```
+services/
+  dashboard.ts
+    - find()           // Método principal
+    - processData()    // Helper para procesar datos
+    - formatResponse() // Helper para formatear respuesta
+    
+controllers/
+  dashboard.ts
+    - find()           // Solo llama al servicio
+```
+
+## Beneficios
+
+- **Separación de responsabilidades**: Controladores manejan HTTP, servicios manejan lógica
+- **Reutilización**: Los servicios pueden ser llamados desde múltiples lugares
+- **Testabilidad**: Los servicios se pueden testear independientemente de HTTP
+- **Mantenibilidad**: La lógica está centralizada y es fácil de encontrar
+- **Consistencia**: Sigue los patrones de Strapi usando `createCoreService` y `createCoreController`

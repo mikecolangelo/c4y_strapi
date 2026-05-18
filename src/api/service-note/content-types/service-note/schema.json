@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "service_notes",
+  "info": {
+    "singularName": "service-note",
+    "pluralName": "service-notes",
+    "displayName": "Service Note",
+    "description": "Notas vinculadas a servicios o órdenes"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "content": {
+      "type": "text",
+      "required": true
+    },
+    "authorName": {
+      "type": "string"
+    },
+    "service": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service.service",
+      "inversedBy": "notes"
+    },
+    "serviceOrder": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service-order.service-order",
+      "inversedBy": "notes"
+    },
+    "author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "serviceNotes"
+    }
+  }
+}

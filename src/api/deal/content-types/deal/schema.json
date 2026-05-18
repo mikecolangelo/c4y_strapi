@@ -1,0 +1,104 @@
+{
+  "kind": "collectionType",
+  "collectionName": "deals",
+  "info": {
+    "singularName": "deal",
+    "pluralName": "deals",
+    "displayName": "Deal",
+    "description": "Contratos y acuerdos comerciales"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "contractType": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::contract-type.contract-type",
+      "description": "Tipo de contrato seleccionado"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pendiente", "firmado", "archivado"],
+      "required": true,
+      "default": "pendiente"
+    },
+    "generatedAt": {
+      "type": "date"
+    },
+    "signedAt": {
+      "type": "date"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "paymentAgreement": {
+      "type": "enumeration",
+      "enum": ["semanal", "quincenal", "mensual"],
+      "default": "semanal"
+    },
+    "initialDeposit": {
+      "type": "decimal",
+      "default": 0,
+      "description": "Depósito inicial del contrato"
+    },
+    "quotaAmount": {
+      "type": "decimal",
+      "description": "Monto de cada cuota"
+    },
+    "totalQuotas": {
+      "type": "integer",
+      "default": 220,
+      "description": "Número total de cuotas (por defecto 220 semanales)"
+    },
+    "summary": {
+      "type": "text"
+    },
+    "client": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::client.client",
+      "inversedBy": "deals"
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "deals"
+    },
+    "seller": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "deals"
+    },
+    "documents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contract-document.contract-document",
+      "mappedBy": "deal"
+    },
+    "clauses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::deal-clause.deal-clause",
+      "mappedBy": "deal"
+    },
+    "discounts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::deal-discount.deal-discount",
+      "mappedBy": "deal"
+    },
+    "billingRecords": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::billing-record.billing-record",
+      "mappedBy": "deal"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "maintenance_kits",
+  "info": {
+    "singularName": "maintenance-kit",
+    "pluralName": "maintenance-kits",
+    "displayName": "Maintenance Kit",
+    "description": "Kits de repuestos agrupados por tipo de mantenimiento"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "oil_change",
+        "preventive",
+        "corrective",
+        "tires",
+        "brakes"
+      ],
+      "required": true,
+      "default": "oil_change"
+    },
+    "description": {
+      "type": "text"
+    },
+    "defaultLaborCost": {
+      "type": "decimal",
+      "default": 0
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "service": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service.service",
+      "inversedBy": "maintenanceKits"
+    },
+    "kitItems": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::maintenance-kit-item.maintenance-kit-item",
+      "mappedBy": "maintenanceKit"
+    }
+  }
+}

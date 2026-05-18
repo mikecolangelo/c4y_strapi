@@ -1,0 +1,19 @@
+{
+    "collectionName": "components_layout_header_sections",
+    "info": {
+        "displayName": "header_section",
+        "icon": "headphone"
+    },
+    "options": {},
+    "attributes": {
+        "title": {
+            "type": "string",
+            "required": true
+        },
+        "subtitle": {
+            "type": "text",
+            "required": true
+        }
+    },
+    "config": {}
+}

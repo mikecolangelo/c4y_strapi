@@ -1,0 +1,217 @@
+{
+    "kind": "collectionType",
+    "collectionName": "fleets",
+    "info": {
+        "singularName": "fleet",
+        "pluralName": "fleets",
+        "displayName": "Fleet",
+        "description": "Gestión de vehículos en la flota"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "vin": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "price": {
+            "type": "decimal",
+            "required": true
+        },
+        "condition": {
+            "type": "enumeration",
+            "enum": ["nuevo", "usado", "seminuevo"],
+            "required": true,
+            "default": "nuevo",
+            "columnName": "status"
+        },
+        "brand": {
+            "type": "string",
+            "required": true
+        },
+        "model": {
+            "type": "string",
+            "required": true
+        },
+        "year": {
+            "type": "integer",
+            "required": true,
+            "min": 1900,
+            "max": 2100
+        },
+        "color": {
+            "type": "string"
+        },
+        "fuelType": {
+            "type": "string"
+        },
+        "transmission": {
+            "type": "string"
+        },
+        "passengerCapacity": {
+            "type": "integer",
+            "min": 1,
+            "max": 50,
+            "description": "Capacidad de pasajeros del vehículo"
+        },
+        "engineNumber": {
+            "type": "string",
+            "description": "Número de motor del vehículo"
+        },
+        "image": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": ["images"]
+        },
+        "imageAlt": {
+            "type": "string"
+        },
+        "preferredBy": {
+            "type": "relation",
+            "relation": "oneToOne",
+            "target": "api::client.client",
+            "mappedBy": "preferredVehicle"
+        },
+        "assignedDrivers": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::user-profile.user-profile",
+            "mappedBy": "assignedVehicles"
+        },
+        "responsables": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::user-profile.user-profile"
+        },
+        "interestedDrivers": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::user-profile.user-profile"
+        },
+        "currentDrivers": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::user-profile.user-profile",
+            "description": "Conductores actuales del vehículo"
+        },
+        "stockQuantity": {
+            "type": "integer",
+            "min": 0,
+            "default": 0
+        },
+        "nextMaintenanceDate": {
+            "type": "date"
+        },
+        "placa": {
+            "type": "string"
+        },
+        "deals": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::deal.deal",
+            "mappedBy": "vehicle"
+        },
+        "appointments": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::appointment.appointment",
+            "mappedBy": "vehicle"
+        },
+        "financing": {
+            "type": "relation",
+            "relation": "oneToOne",
+            "target": "api::financing.financing",
+            "mappedBy": "vehicle"
+        },
+        "serviceOrders": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::service-order.service-order",
+            "mappedBy": "vehicle"
+        },
+        "notes": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::fleet-note.fleet-note",
+            "mappedBy": "vehicle"
+        },
+        "statuses": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::fleet-status.fleet-status",
+            "mappedBy": "vehicle"
+        },
+        "documents": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::fleet-document.fleet-document",
+            "mappedBy": "vehicle"
+        },
+        "reminders": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::fleet-reminder.fleet-reminder",
+            "mappedBy": "vehicle"
+        },
+        "notifications": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::notification.notification",
+            "mappedBy": "fleetVehicle",
+            "description": "Notificaciones y recordatorios relacionados con este vehículo"
+        },
+        "interestedPersons": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::client.client"
+        },
+        "billingInitials": {
+            "type": "string",
+            "description": "Siglas para facturación (ej: FM para Ford Mustang). Se calcula automáticamente si está vacío."
+        },
+        "currentMileage": {
+            "type": "decimal",
+            "min": 0,
+            "default": 0,
+            "description": "Kilometraje recorrido actual del vehículo en kilómetros"
+        },
+        "lastOilChangeMileage": {
+            "type": "decimal",
+            "min": 0,
+            "default": 0,
+            "description": "Kilometraje registrado en el último cambio de aceite"
+        },
+        "oilChangeNotificationSent": {
+            "type": "boolean",
+            "default": false,
+            "description": "Indica si ya se envió la notificación de cambio de aceite próximo"
+        },
+        "serviceAppointments": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::appointment.appointment",
+            "mappedBy": "fleetVehicle"
+        },
+        "createdBy": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::user-profile.user-profile",
+            "description": "Usuario que registró este vehículo"
+        },
+        "driverHistory": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::driver-history.driver-history",
+            "mappedBy": "vehicle",
+            "description": "Historial de conductores que han manejado este vehículo"
+        }
+    }
+}

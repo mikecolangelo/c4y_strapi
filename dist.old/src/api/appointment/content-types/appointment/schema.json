@@ -1,0 +1,103 @@
+{
+    "kind": "collectionType",
+    "collectionName": "appointments",
+    "info": {
+        "singularName": "appointment",
+        "pluralName": "appointments",
+        "displayName": "Appointment"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "title": {
+            "type": "string"
+        },
+        "type": {
+            "type": "enumeration",
+            "enum": ["venta", "prueba", "mantenimiento"],
+            "required": true
+        },
+        "status": {
+            "type": "enumeration",
+            "enum": ["confirmada", "pendiente", "cancelada"],
+            "required": true,
+            "default": "pendiente"
+        },
+        "scheduledAt": {
+            "type": "datetime",
+            "required": true
+        },
+        "durationMinutes": {
+            "type": "integer"
+        },
+        "description": {
+            "type": "text"
+        },
+        "price": {
+            "type": "decimal"
+        },
+        "notes": {
+            "type": "text"
+        },
+        "location": {
+            "type": "string"
+        },
+        "contactPhone": {
+            "type": "string"
+        },
+        "contactEmail": {
+            "type": "email"
+        },
+        "client": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::client.client",
+            "inversedBy": "appointments"
+        },
+        "vehicle": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::fleet.fleet",
+            "inversedBy": "appointments"
+        },
+        "deal": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::deal.deal",
+            "inversedBy": "appointments"
+        },
+        "assignedTo": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::user-profile.user-profile",
+            "inversedBy": "appointments"
+        },
+        "serviceOrder": {
+            "type": "relation",
+            "relation": "oneToOne",
+            "target": "api::service-order.service-order",
+            "inversedBy": "appointment"
+        },
+        "service": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::service.service",
+            "inversedBy": "appointments"
+        },
+        "fleetVehicle": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::fleet.fleet",
+            "inversedBy": "serviceAppointments"
+        },
+        "notifications": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::notification.notification",
+            "mappedBy": "appointment",
+            "description": "Notificaciones generadas por esta cita"
+        }
+    }
+}

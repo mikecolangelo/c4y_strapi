@@ -1,0 +1,118 @@
+{
+    "kind": "collectionType",
+    "collectionName": "financings",
+    "info": {
+        "singularName": "financing",
+        "pluralName": "financings",
+        "displayName": "Financing",
+        "description": "Plan de financiamiento vehicular (Pago Padre)"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "financingNumber": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "totalAmount": {
+            "type": "decimal",
+            "required": true
+        },
+        "financingMonths": {
+            "type": "integer",
+            "default": 54,
+            "min": 1,
+            "max": 120
+        },
+        "paymentFrequency": {
+            "type": "enumeration",
+            "enum": ["semanal", "quincenal", "mensual"],
+            "required": true,
+            "default": "semanal"
+        },
+        "quotaAmount": {
+            "type": "decimal",
+            "required": true
+        },
+        "totalQuotas": {
+            "type": "integer",
+            "required": true
+        },
+        "paidQuotas": {
+            "type": "integer",
+            "default": 0
+        },
+        "startDate": {
+            "type": "date",
+            "required": true
+        },
+        "nextDueDate": {
+            "type": "date"
+        },
+        "status": {
+            "type": "enumeration",
+            "enum": ["activo", "inactivo", "en_mora", "completado"],
+            "required": true,
+            "default": "activo"
+        },
+        "maxLateQuotasAllowed": {
+            "type": "integer",
+            "default": 4,
+            "min": 1
+        },
+        "lateFeePercentage": {
+            "type": "decimal",
+            "default": 10
+        },
+        "currentBalance": {
+            "type": "decimal",
+            "required": true
+        },
+        "totalPaid": {
+            "type": "decimal",
+            "default": 0
+        },
+        "totalLateFees": {
+            "type": "decimal",
+            "default": 0
+        },
+        "lateQuotasCount": {
+            "type": "integer",
+            "default": 0
+        },
+        "partialPaymentCredit": {
+            "type": "decimal",
+            "default": 0
+        },
+        "notes": {
+            "type": "text"
+        },
+        "vehicle": {
+            "type": "relation",
+            "relation": "oneToOne",
+            "target": "api::fleet.fleet",
+            "inversedBy": "financing"
+        },
+        "client": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::user-profile.user-profile",
+            "inversedBy": "financings"
+        },
+        "payments": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::billing-record.billing-record",
+            "mappedBy": "financing"
+        },
+        "invoices": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::invoice.invoice",
+            "mappedBy": "financing"
+        }
+    }
+}

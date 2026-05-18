@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inventory_notes",
+  "info": {
+    "singularName": "inventory-note",
+    "pluralName": "inventory-notes",
+    "displayName": "Inventory Note"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "content": {
+      "type": "text",
+      "required": true
+    },
+    "authorName": {
+      "type": "string"
+    },
+    "item": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::inventory-item.inventory-item",
+      "inversedBy": "notes"
+    },
+    "author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "inventoryNotes"
+    }
+  }
+}

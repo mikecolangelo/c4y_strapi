@@ -1,0 +1,31 @@
+{
+    "kind": "collectionType",
+    "collectionName": "billing_documents",
+    "info": {
+        "singularName": "billing-document",
+        "pluralName": "billing-documents",
+        "displayName": "Billing Document"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "file": {
+            "type": "media",
+            "multiple": false,
+            "required": true,
+            "allowedTypes": ["files", "images"]
+        },
+        "record": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::billing-record.billing-record",
+            "inversedBy": "documents"
+        }
+    }
+}

@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "service_order_inventory_items",
+  "info": {
+    "singularName": "service-order-inventory-item",
+    "pluralName": "service-order-inventory-items",
+    "displayName": "Service Order Inventory Item",
+    "description": "Líneas de repuestos utilizadas en una orden de servicio (collection intermedia)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "quantity": {
+      "type": "float",
+      "required": true,
+      "min": 0.01
+    },
+    "unitPriceAtMoment": {
+      "type": "decimal",
+      "required": true,
+      "default": 0
+    },
+    "totalLine": {
+      "type": "decimal",
+      "default": 0
+    },
+    "serviceOrder": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service-order.service-order",
+      "inversedBy": "serviceOrderInventoryItems"
+    },
+    "inventoryItem": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::inventory-item.inventory-item",
+      "inversedBy": "serviceOrderInventoryItems"
+    }
+  }
+}

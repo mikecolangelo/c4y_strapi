@@ -1,0 +1,26 @@
+{
+    "collectionName": "components_metada_headers",
+    "info": {
+        "displayName": "header"
+    },
+    "options": {},
+    "attributes": {
+        "title": {
+            "type": "string",
+            "required": true
+        },
+        "description": {
+            "type": "text",
+            "required": true
+        },
+        "favicon": {
+            "type": "media",
+            "multiple": false,
+            "required": true,
+            "allowedTypes": [
+                "images"
+            ]
+        }
+    },
+    "config": {}
+}

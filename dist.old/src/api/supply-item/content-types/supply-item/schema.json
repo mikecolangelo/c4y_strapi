@@ -1,0 +1,62 @@
+{
+    "kind": "collectionType",
+    "collectionName": "supply_items",
+    "info": {
+        "singularName": "supply-item",
+        "pluralName": "supply-items",
+        "displayName": "Supply Item",
+        "description": "Catálogo de insumos básicos con control de stock"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "type": {
+            "type": "enumeration",
+            "enum": ["kit_limpieza", "gasolina", "aceite", "otros"],
+            "required": true,
+            "default": "otros"
+        },
+        "stock": {
+            "type": "integer",
+            "required": true,
+            "default": 0,
+            "min": 0
+        },
+        "unit": {
+            "type": "enumeration",
+            "enum": ["unidades", "litros", "galones", "kits"],
+            "required": true,
+            "default": "unidades"
+        },
+        "minStock": {
+            "type": "integer",
+            "default": 5,
+            "min": 0
+        },
+        "description": {
+            "type": "text"
+        },
+        "isActive": {
+            "type": "boolean",
+            "default": true
+        },
+        "icon": {
+            "type": "enumeration",
+            "enum": ["package", "fuel", "droplet", "box"],
+            "default": "box"
+        },
+        "requests": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::supply-request.supply-request",
+            "mappedBy": "supplyItem"
+        }
+    }
+}

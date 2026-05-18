@@ -1,0 +1,45 @@
+{
+  "kind": "collectionType",
+  "collectionName": "fleet_mileage_histories",
+  "info": {
+    "singularName": "fleet-mileage-history",
+    "pluralName": "fleet-mileage-histories",
+    "displayName": "Fleet Mileage History",
+    "description": "Historial de cambios de kilometraje y registros de cambio de aceite"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "previousMileage": {
+      "type": "integer",
+      "min": 0,
+      "required": true
+    },
+    "newMileage": {
+      "type": "integer",
+      "min": 0,
+      "required": true
+    },
+    "notes": {
+      "type": "text",
+      "required": false
+    },
+    "createdByName": {
+      "type": "string"
+    },
+    "changeType": {
+      "type": "enumeration",
+      "enum": ["mileage_update", "oil_change_reset"],
+      "default": "mileage_update",
+      "required": true
+    },
+    "vehicle": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "mileageHistory"
+    }
+  }
+}
