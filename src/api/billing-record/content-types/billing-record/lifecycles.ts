@@ -8,8 +8,13 @@
  * 
  * Valida relaciones padre/hijo:
  * - Evita auto-referencia (un registro no puede ser padre de sí mismo)
- * - Verifica que padre e hijo pertenezcan al mismo financing
+ * - Verifica que padre e hijo pertenezcan al mismo financiamiento
  * - Evita ciclos (un padre no puede ser hijo de otro registro)
+ * 
+ * Manejo de duplicados:
+ * - Si se crea un registro con receiptNumber ya existente que tiene "abonado",
+ *   el registro existente se convierte en hijo del nuevo (anidación jerárquica)
+ * - Ambos quedan como "pendiente" hasta que se regularicen
  */
 
 interface BillingRecordData {
@@ -122,19 +127,161 @@ const isDescendant = async (strapi: any, parentId: number | string, childId: num
       where: { id: childId },
       populate: ['parentRecord'],
     });
-    
+
     if (!record || !record.parentRecord) return false;
-    
+
     const recordParentId = record.parentRecord.id;
-    
+
     // Si el padre del registro es el parentId que buscamos, es descendiente
     if (recordParentId === parentId) return true;
-    
+
     // Si no, seguir buscando hacia arriba
     return await isDescendant(strapi, parentId, recordParentId);
   } catch (error) {
     console.error('[Lifecycle] Error checking descendant:', error);
     return false;
+  }
+};
+
+/**
+ * Maneja duplicados de receiptNumber con jerarquía automática.
+ *
+ * Escenario: Se crea un nuevo registro con receiptNumber ya existente
+ * y el nuevo registro tiene "abonado" (crédito por adelantado).
+ * El registro existente (Pagado) se convierte en hijo del nuevo.
+ * Ambos quedan como "pendiente".
+ *
+ * @param strapi - Instancia de Strapi
+ * @param data - Datos del nuevo registro a crear
+ * @returns true si se manejó un duplicado (el registro no debe crearse como nuevo)
+ */
+const handleDuplicateReceiptNumber = async (
+  strapi: any,
+  data: BillingRecordData
+): Promise<{ handled: boolean; parentRecordId?: number }> => {
+  const receiptNumber = data.receiptNumber;
+  if (!receiptNumber) {
+    return { handled: false };
+  }
+
+  // Solo procesar si el nuevo registro tiene abonado o advanceCredit
+  const newHasAbonado = data.status === 'abonado' || (data.advanceCredit && Number(data.advanceCredit) > 0);
+  if (!newHasAbonado) {
+    return { handled: false };
+  }
+
+  try {
+    // Buscar registro existente con mismo receiptNumber que NO tenga ya padre
+    // y que no sea él mismo un hijo (para evitar transformar algo que ya es hijo)
+    const existingRecords = await strapi.db.query('api::billing-record.billing-record').findMany({
+      where: {
+        receiptNumber: receiptNumber,
+        parentRecord: { $null: true },
+      },
+      populate: ['financing', 'coveredQuotas'],
+      limit: 1,
+    });
+
+    if (!existingRecords || existingRecords.length === 0) {
+      console.log(`[handleDuplicate] No se encontró registro existente sin padre para receiptNumber: ${receiptNumber}`);
+      return { handled: false };
+    }
+
+    const existingRecord = existingRecords[0];
+
+    // Si el registro existente ya tiene coveredBy o ya es hijo, no procesar
+    if (existingRecord.coveredBy) {
+      console.log(`[handleDuplicate] El registro existente ya tiene coveredBy, no se procesa`);
+      return { handled: false };
+    }
+
+    // Si el registro existente es exactamente igual al que intentamos crear (mismo ID), no procesar
+    if (data.id && existingRecord.id === data.id) {
+      return { handled: false };
+    }
+
+    console.log(`[handleDuplicate] Transformando registro existente ID ${existingRecord.id} en hijo del nuevo registro`);
+    console.log(`[handleDuplicate] existingRecord.status: ${existingRecord.status}, amount: ${existingRecord.amount}`);
+
+    // Obtener el financing del registro existente para encontrar el ID interno
+    const existingFinancingId = existingRecord.financing?.id || existingRecord.financing;
+    if (!existingFinancingId) {
+      console.log(`[handleDuplicate] El registro existente no tiene financing asociado`);
+      return { handled: false };
+    }
+
+    // Ahora necesitamos crear el nuevo registro con el existing como hijo.
+    // Como estamos en beforeCreate, no podemos cambiar data para que sea update,
+    // pero podemos:
+    // 1. Vincular el existente como hijo del nuevo (parentRecord)
+    // 2. Ambos quedan como pendiente
+
+    // Para lograr esto, necesitamos:
+    // - Actualizar el registro existente para que apunte al nuevo como su padre
+    // - Ambos deben quedar como pendiente
+
+    // El ID del nuevo registro aún no existe, así que no podemos setear parentRecord todavía.
+    // Lo que haremos es:
+    // 1. Guardar el ID del existing para usarlo como child
+    // 2. En afterCreate, actualizaremos el existente para que sea hijo del nuevo
+
+    // Marcamos el existing para indicar que será hijo (usamos un campo temporal o lo procesamos en afterCreate)
+    // Por ahora, retornamos que sí se manejó y guardamos el ID del existing
+
+    // Pero espera - el ID del nuevo registro no existe todavía.
+    // La solución es usar un campo especial: coveredBy/coveredQuotas
+    // Cuando el new registro se crea, en afterCreate usamos coveredQuotas para linkar
+
+    // Mejor aproximación: usar parentRecord del existing para apuntar a la relación correcta.
+    // Después de crear el nuevo registro, en afterCreate actualizamos el existente.
+
+    // Guardar referencia para después (via un mecanismo - population o similar)
+    // Por ahora retornamos que se manejó para que el flujo continúe
+    // y en afterCreate se haga la vinculación real
+
+    return { handled: true, parentRecordId: existingRecord.id };
+
+  } catch (error) {
+    console.error('[handleDuplicate] Error al procesar duplicado:', error);
+    return { handled: false };
+  }
+};
+
+/**
+ * Vincula un registro existente como hijo del nuevo registro (afterCreate)
+ */
+const linkExistingAsChild = async (
+  strapi: any,
+  newRecordId: number,
+  existingChildId: number
+): Promise<void> => {
+  try {
+    // El existing record se convierte en hijo del nuevo
+    // Ambos quedan como "pendiente"
+
+    await strapi.db.query('api::billing-record.billing-record').update({
+      where: { id: existingChildId },
+      data: {
+        parentRecord: newRecordId,
+        status: 'pendiente', // El hijo pasa a pendiente
+      },
+    });
+
+    console.log(`[linkExistingAsChild] Registro ${existingChildId} vinculado como hijo de ${newRecordId}`);
+
+    // También actualizar el nuevo registro para que quede como pendiente
+    // (porque el crédito de abonado no cubre completamente la cuota)
+    await strapi.db.query('api::billing-record.billing-record').update({
+      where: { id: newRecordId },
+      data: {
+        status: 'pendiente',
+      },
+    });
+
+    console.log(`[linkExistingAsChild] Registro ${newRecordId} marcado como pendiente (tenía abonado)`);
+
+  } catch (error) {
+    console.error('[linkExistingAsChild] Error al vincular hijo:', error);
   }
 };
 
@@ -193,11 +340,21 @@ const validateParentRecord = async (
 export default {
   async beforeCreate(event: { params: { data: BillingRecordData }; state?: Record<string, unknown> }) {
     const { data } = event.params;
-    
+
     // Procesar cálculos de días de retraso y multas
     const updates = processPaymentData(data);
     Object.assign(data, updates);
-    
+
+    // Manejo de duplicados con jerarquía automática
+    const duplicateResult = await handleDuplicateReceiptNumber(strapi, data);
+    if (duplicateResult.handled && duplicateResult.parentRecordId) {
+      // Guardar el ID del registro hijo para vincularlo en afterCreate
+      // Usamos event.state para pasar información entre beforeCreate y afterCreate
+      if (!event.state) event.state = {};
+      event.state.pendingChildRecordId = duplicateResult.parentRecordId;
+      console.log(`[beforeCreate] Duplicado detectado. Child ${duplicateResult.parentRecordId} será vinculado después`);
+    }
+
     // Validar relación padre/hijo
     const validation = await validateParentRecord(strapi, data);
     if (!validation.valid) {
@@ -205,13 +362,23 @@ export default {
     }
   },
 
+  async afterCreate(event: { result: any; params: { data: BillingRecordData }; state?: Record<string, unknown> }) {
+    const newRecord = event.result;
+
+    // Si tenemos un child record pendiente por vincular, hacerlo ahora
+    if (event.state?.pendingChildRecordId && newRecord?.id) {
+      await linkExistingAsChild(strapi, newRecord.id, event.state.pendingChildRecordId);
+      delete event.state.pendingChildRecordId;
+    }
+  },
+
   async beforeUpdate(event: { params: { data: BillingRecordData; where: { id: number } }; state?: Record<string, unknown> }) {
     const { data, where } = event.params;
-    
+
     // Procesar cálculos de días de retraso y multas
     const updates = processPaymentData(data);
     Object.assign(data, updates);
-    
+
     // Validar relación padre/hijo (pasando el ID del registro actual)
     const validation = await validateParentRecord(strapi, data, where.id);
     if (!validation.valid) {
