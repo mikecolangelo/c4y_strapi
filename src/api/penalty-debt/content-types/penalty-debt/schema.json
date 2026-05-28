@@ -1,0 +1,69 @@
+{
+  "kind": "collectionType",
+  "collectionName": "penalty_debts",
+  "info": {
+    "singularName": "penalty-debt",
+    "pluralName": "penalty-debts",
+    "displayName": "Penalty Debt",
+    "description": "Penalidad independiente generada por mora sobre una cuota. Participa en la cola FIFO unificada de deudas."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "amountOriginal": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "amountPending": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "dueDate": {
+      "type": "date",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "partially_paid", "paid", "cancelled"],
+      "required": true,
+      "default": "pending"
+    },
+    "daysAccrued": {
+      "type": "integer",
+      "min": 0,
+      "default": 1
+    },
+    "dailyRatePercent": {
+      "type": "decimal",
+      "min": 0,
+      "default": 10
+    },
+    "source": {
+      "type": "string",
+      "default": "auto_accrual"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "financing": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::financing.financing"
+    },
+    "quotaRecord": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::billing-record.billing-record"
+    },
+    "applications": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::payment-application.payment-application",
+      "mappedBy": "penaltyDebt"
+    }
+  }
+}

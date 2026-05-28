@@ -125,6 +125,12 @@
       "relation": "oneToMany",
       "target": "api::billing-record.billing-record",
       "mappedBy": "coveredBy"
+    },
+    "applications": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::payment-application.payment-application",
+      "mappedBy": "quotaRecord"
     }
   }
 }

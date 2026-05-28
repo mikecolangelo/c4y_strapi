@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "payment_applications",
+  "info": {
+    "singularName": "payment-application",
+    "pluralName": "payment-applications",
+    "displayName": "Payment Application",
+    "description": "Ledger de auditoría: rastrea cómo un pago (billing-record) se aplica a una deuda (quota o penalidad)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "amountApplied": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "appliedAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "paymentLeftAfter": {
+      "type": "decimal",
+      "min": 0
+    },
+    "debtLeftAfter": {
+      "type": "decimal",
+      "min": 0
+    },
+    "paymentRecord": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::billing-record.billing-record"
+    },
+    "quotaRecord": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::billing-record.billing-record",
+      "inversedBy": "applications"
+    },
+    "penaltyDebt": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::penalty-debt.penalty-debt",
+      "inversedBy": "applications"
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}

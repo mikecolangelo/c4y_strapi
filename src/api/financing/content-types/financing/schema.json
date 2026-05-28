@@ -113,6 +113,12 @@
       "relation": "oneToMany",
       "target": "api::invoice.invoice",
       "mappedBy": "financing"
+    },
+    "penaltyDebts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::penalty-debt.penalty-debt",
+      "mappedBy": "financing"
     }
   }
 }
