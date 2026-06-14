@@ -1,5 +1,29 @@
+allowBuilds:
+  '@swc/core': true
+  better-sqlite3: true
+  core-js-pure: true
+  esbuild: true
+  sharp: true
 onlyBuiltDependencies:
   - '@swc/core'
   - core-js-pure
   - esbuild
   - sharp
+overrides:
+  '@strapi/admin': 5.33.3
+  '@strapi/content-manager': 5.33.3
+  '@strapi/content-type-builder': 5.33.3
+  '@strapi/content-releases': 5.33.3
+  '@strapi/core': 5.33.3
+  '@strapi/database': 5.33.3
+  '@strapi/data-transfer': 5.33.3
+  '@strapi/email': 5.33.3
+  '@strapi/generators': 5.33.3
+  '@strapi/i18n': 5.33.3
+  '@strapi/logger': 5.33.3
+  '@strapi/permissions': 5.33.3
+  '@strapi/review-workflows': 5.33.3
+  '@strapi/types': 5.33.3
+  '@strapi/typescript-utils': 5.33.3
+  '@strapi/upload': 5.33.3
+  '@strapi/utils': 5.33.3

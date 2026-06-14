@@ -16,11 +16,11 @@
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
-    "@strapi/plugin-cloud": "5.31.0",
-    "@strapi/plugin-documentation": "5.31.0",
-    "@strapi/plugin-users-permissions": "5.31.0",
-    "@strapi/strapi": "5.31.0",
-    "@strapi/utils": "5.31.0",
+    "@strapi/plugin-cloud": "5.33.3",
+    "@strapi/plugin-documentation": "5.33.3",
+    "@strapi/plugin-users-permissions": "5.33.3",
+    "@strapi/strapi": "5.33.3",
+    "@strapi/utils": "5.33.3",
     "better-sqlite3": "^12.10.0",
     "nodemailer": "^8.0.5",
     "pg": "8.8.0",
@@ -35,6 +35,7 @@
     "@types/nodemailer": "^8.0.0",
     "@types/react": "18",
     "@types/react-dom": "18",
+    "baseline-browser-mapping": "^2.10.35",
     "typescript": "5",
     "vite": "^5.4.19",
     "vitest": "4.0.15"
