@@ -155,8 +155,9 @@ export default factories.createCoreController('api::fleet-document.fleet-documen
     }
 
     // Si se está actualizando documentType, validar que exista y esté activo
+    let documentTypeId: string | number | undefined;
     if (data?.documentType) {
-      const documentTypeId = extractRelationId(data.documentType);
+      documentTypeId = extractRelationId(data.documentType);
       if (documentTypeId) {
         const validation = await validateDocumentType(strapi, documentTypeId);
         if (!validation.valid) {

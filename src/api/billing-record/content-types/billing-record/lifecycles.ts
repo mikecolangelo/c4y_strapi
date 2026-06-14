@@ -29,6 +29,8 @@ interface BillingRecordData {
   parentRecord?: number | string | { id: number; documentId?: string } | null;
   documentId?: string;
   id?: number;
+  receiptNumber?: string;
+  advanceCredit?: number | string;
 }
 
 /**
@@ -367,7 +369,7 @@ export default {
 
     // Si tenemos un child record pendiente por vincular, hacerlo ahora
     if (event.state?.pendingChildRecordId && newRecord?.id) {
-      await linkExistingAsChild(strapi, newRecord.id, event.state.pendingChildRecordId);
+      await linkExistingAsChild(strapi, newRecord.id, event.state.pendingChildRecordId as number);
       delete event.state.pendingChildRecordId;
     }
   },

@@ -4,22 +4,23 @@
 
 import { factories } from '@strapi/strapi'
 
-export default factories.createCoreController('api::fleet.fleet', ({ strapi }) => ({
-  sanitizeFleetEntity(entity: any) {
-    const relationFields = ['responsables', 'assignedDrivers', 'interestedDrivers', 'currentDrivers', 'interestedPersons'];
-    for (const field of relationFields) {
-      if (Array.isArray(entity[field])) {
-        entity[field] = entity[field].map((item: any) => {
-          if (item && typeof item === 'object') {
-            const { password, ...rest } = item;
-            return rest;
-          }
-          return item;
-        });
-      }
+function sanitizeFleetEntity(entity: any) {
+  const relationFields = ['responsables', 'assignedDrivers', 'interestedDrivers', 'currentDrivers', 'interestedPersons'];
+  for (const field of relationFields) {
+    if (Array.isArray(entity[field])) {
+      entity[field] = entity[field].map((item: any) => {
+        if (item && typeof item === 'object') {
+          const { password, ...rest } = item;
+          return rest;
+        }
+        return item;
+      });
     }
-    return entity;
-  },
+  }
+  return entity;
+}
+
+export default factories.createCoreController('api::fleet.fleet', ({ strapi }) => ({
 
   async findOne(ctx) {
     const documentId = ctx.params.id;
@@ -42,7 +43,7 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
       if (!entity) {
         return ctx.notFound('Vehículo no encontrado');
       }
-      const sanitized = this.sanitizeFleetEntity(entity);
+      const sanitized = sanitizeFleetEntity(entity);
       return this.transformResponse(sanitized);
     } catch (error) {
       console.error('Error obteniendo vehículo:', error);
@@ -126,7 +127,7 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
         },
       });
 
-      const sanitized = this.sanitizeFleetEntity(entity);
+      const sanitized = sanitizeFleetEntity(entity);
       return this.transformResponse(sanitized);
     } catch (error) {
       console.error('Error actualizando vehículo:', error);
@@ -378,10 +379,10 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
     const currentMileage = parseInt(vehicle.currentMileage || 0, 10);
     const newMileage = currentMileage + parseFloat(additionalMileage || 0);
     ctx.request.body = { newMileage, notes: ctx.request.body?.notes };
-    return this.setMileageRecord(ctx);
+    return (this as any).setMileageRecord(ctx);
   },
 
   async resetOilChangeCounter(ctx) {
-    return this.recordOilChange(ctx);
+    return (this as any).recordOilChange(ctx);
   },
 }));

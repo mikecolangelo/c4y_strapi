@@ -335,9 +335,9 @@ export default factories.createCoreController('api::user-profile.user-profile', 
           // Determinar rol: solo admins pueden importar roles distintos a 'lead'
           const requestedRole = row.role ? String(row.role).toLowerCase().trim() : null;
           const allowedRoles = ['admin', 'seller', 'driver', 'lead'];
-          const effectiveRole = isAdmin && requestedRole && allowedRoles.includes(requestedRole)
+          const effectiveRole = (isAdmin && requestedRole && allowedRoles.includes(requestedRole)
             ? requestedRole
-            : 'lead';
+            : 'lead') as 'admin' | 'seller' | 'driver' | 'lead';
 
           // Crear el lead
           const payload = {

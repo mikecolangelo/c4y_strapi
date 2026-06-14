@@ -485,6 +485,10 @@ export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     scheduledAt: Schema.Attribute.DateTime & Schema.Attribute.Required;
     service: Schema.Attribute.Relation<'manyToOne', 'api::service.service'>;
+    serviceOrder: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::service-order.service-order'
+    >;
     status: Schema.Attribute.Enumeration<
       ['confirmada', 'pendiente', 'cancelada']
     > &
@@ -545,11 +549,15 @@ export interface ApiBillingRecordBillingRecord
     singularName: 'billing-record';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     advanceCredit: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     amount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    applications: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::payment-application.payment-application'
+    >;
     childRecords: Schema.Attribute.Relation<
       'oneToMany',
       'api::billing-record.billing-record'
@@ -1144,7 +1152,7 @@ export interface ApiFinancingFinancing extends Struct.CollectionTypeSchema {
     singularName: 'financing';
   };
   options: {
-    draftAndPublish: true;
+    draftAndPublish: false;
   };
   attributes: {
     client: Schema.Attribute.Relation<
@@ -1198,6 +1206,10 @@ export interface ApiFinancingFinancing extends Struct.CollectionTypeSchema {
     payments: Schema.Attribute.Relation<
       'oneToMany',
       'api::billing-record.billing-record'
+    >;
+    penaltyDebts: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::penalty-debt.penalty-debt'
     >;
     publishedAt: Schema.Attribute.DateTime;
     quotaAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
@@ -1663,6 +1675,10 @@ export interface ApiInventoryItemInventoryItem
       'oneToMany',
       'api::inventory-movement.inventory-movement'
     >;
+    inventoryRequests: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::inventory-request.inventory-request'
+    >;
     isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     lastRestocked: Schema.Attribute.Date;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -1672,6 +1688,10 @@ export interface ApiInventoryItemInventoryItem
     > &
       Schema.Attribute.Private;
     location: Schema.Attribute.String;
+    maintenanceKitItems: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::maintenance-kit-item.maintenance-kit-item'
+    >;
     maxStock: Schema.Attribute.Float;
     minStock: Schema.Attribute.Float;
     notes: Schema.Attribute.Relation<
@@ -1797,6 +1817,68 @@ export interface ApiInventoryNoteInventoryNote
   };
 }
 
+export interface ApiInventoryRequestInventoryRequest
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'inventory_requests';
+  info: {
+    description: 'Solicitudes de piezas de inventario por parte de usuarios';
+    displayName: 'Inventory Request';
+    pluralName: 'inventory-requests';
+    singularName: 'inventory-request';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    approvedAt: Schema.Attribute.DateTime;
+    approvedBy: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::user-profile.user-profile'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deliveredAt: Schema.Attribute.DateTime;
+    inventoryItem: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::inventory-item.inventory-item'
+    >;
+    justification: Schema.Attribute.Text & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::inventory-request.inventory-request'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Float &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0.01;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<1>;
+    requestedAt: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    requester: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::user-profile.user-profile'
+    >;
+    requestNumber: Schema.Attribute.String & Schema.Attribute.Unique;
+    status: Schema.Attribute.Enumeration<
+      ['pendiente', 'aprobado', 'rechazado', 'entregado', 'cancelado']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pendiente'>;
+    unit: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiInvoiceInvoice extends Struct.CollectionTypeSchema {
   collectionName: 'invoices';
   info: {
@@ -1853,6 +1935,94 @@ export interface ApiInvoiceInvoice extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'pending'>;
     totalAmount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiMaintenanceKitItemMaintenanceKitItem
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'maintenance_kit_items';
+  info: {
+    description: 'L\u00EDneas de repuestos dentro de un kit de mantenimiento';
+    displayName: 'Maintenance Kit Item';
+    pluralName: 'maintenance-kit-items';
+    singularName: 'maintenance-kit-item';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    inventoryItem: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::inventory-item.inventory-item'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::maintenance-kit-item.maintenance-kit-item'
+    > &
+      Schema.Attribute.Private;
+    maintenanceKit: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::maintenance-kit.maintenance-kit'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    quantity: Schema.Attribute.Float &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0.01;
+        },
+        number
+      >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiMaintenanceKitMaintenanceKit
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'maintenance_kits';
+  info: {
+    description: 'Kits de repuestos agrupados por tipo de mantenimiento';
+    displayName: 'Maintenance Kit';
+    pluralName: 'maintenance-kits';
+    singularName: 'maintenance-kit';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    defaultLaborCost: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
+    description: Schema.Attribute.Text;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    kitItems: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::maintenance-kit-item.maintenance-kit-item'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::maintenance-kit.maintenance-kit'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    service: Schema.Attribute.Relation<'manyToOne', 'api::service.service'>;
+    type: Schema.Attribute.Enumeration<
+      ['oil_change', 'preventive', 'corrective', 'tires', 'brakes']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'oil_change'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1965,6 +2135,152 @@ export interface ApiNotificationNotification
   };
 }
 
+export interface ApiPaymentApplicationPaymentApplication
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'payment_applications';
+  info: {
+    description: 'Ledger de auditor\u00EDa: rastrea c\u00F3mo un pago (billing-record) se aplica a una deuda (quota o penalidad).';
+    displayName: 'Payment Application';
+    pluralName: 'payment-applications';
+    singularName: 'payment-application';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amountApplied: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      >;
+    appliedAt: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    debtLeftAfter: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::payment-application.payment-application'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    paymentLeftAfter: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      >;
+    paymentRecord: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::billing-record.billing-record'
+    >;
+    penaltyDebt: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::penalty-debt.penalty-debt'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    quotaRecord: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::billing-record.billing-record'
+    >;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPenaltyDebtPenaltyDebt extends Struct.CollectionTypeSchema {
+  collectionName: 'penalty_debts';
+  info: {
+    description: 'Penalidad independiente generada por mora sobre una cuota. Participa en la cola FIFO unificada de deudas.';
+    displayName: 'Penalty Debt';
+    pluralName: 'penalty-debts';
+    singularName: 'penalty-debt';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amountOriginal: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      >;
+    amountPending: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      >;
+    applications: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::payment-application.payment-application'
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dailyRatePercent: Schema.Attribute.Decimal &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<10>;
+    daysAccrued: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<1>;
+    dueDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    financing: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::financing.financing'
+    >;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::penalty-debt.penalty-debt'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text;
+    publishedAt: Schema.Attribute.DateTime;
+    quotaRecord: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::billing-record.billing-record'
+    >;
+    source: Schema.Attribute.String &
+      Schema.Attribute.DefaultTo<'auto_accrual'>;
+    status: Schema.Attribute.Enumeration<
+      ['pending', 'partially_paid', 'paid', 'cancelled']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiServiceNoteServiceNote extends Struct.CollectionTypeSchema {
   collectionName: 'service_notes';
   info: {
@@ -2066,6 +2382,10 @@ export interface ApiServiceOrderServiceOrder
     draftAndPublish: false;
   };
   attributes: {
+    appointment: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::appointment.appointment'
+    >;
     code: Schema.Attribute.String & Schema.Attribute.Unique;
     completedAt: Schema.Attribute.DateTime;
     createdAt: Schema.Attribute.DateTime;
@@ -2129,10 +2449,12 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    agencyCost: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     appointments: Schema.Attribute.Relation<
       'oneToMany',
       'api::appointment.appointment'
     >;
+    basePrice: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<0>;
     category: Schema.Attribute.String;
     coverage: Schema.Attribute.Enumeration<['cliente', 'empresa']> &
       Schema.Attribute.Required &
@@ -2140,6 +2462,7 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    defaultTemplate: Schema.Attribute.JSON;
     description: Schema.Attribute.Text;
     durationMinutes: Schema.Attribute.Integer;
     isFree: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -2149,6 +2472,10 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
       'api::service.service'
     > &
       Schema.Attribute.Private;
+    maintenanceKits: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::maintenance-kit.maintenance-kit'
+    >;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     notes: Schema.Attribute.Relation<
       'oneToMany',
@@ -2417,6 +2744,10 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::appointment.appointment'
     >;
+    approvedInventoryRequests: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::inventory-request.inventory-request'
+    >;
     approvedSupplyRequests: Schema.Attribute.Relation<
       'oneToMany',
       'api::supply-request.supply-request'
@@ -2472,6 +2803,10 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
     inventoryNotes: Schema.Attribute.Relation<
       'oneToMany',
       'api::inventory-note.inventory-note'
+    >;
+    inventoryRequests: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::inventory-request.inventory-request'
     >;
     linkedin: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -2624,6 +2959,65 @@ export interface ApiVehicleStateVehicleState
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     vehicle: Schema.Attribute.Relation<'manyToOne', 'api::fleet.fleet'>;
+  };
+}
+
+export interface ApiWeeklyCollectionWeeklyCollection
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'weekly_collections';
+  info: {
+    description: 'Registros de cobranza semanal importados masivamente desde Excel/CSV';
+    displayName: 'Cobranza Semanal';
+    pluralName: 'weekly-collections';
+    singularName: 'weekly-collection';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amountPaid: Schema.Attribute.Decimal;
+    client: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::user-profile.user-profile'
+    >;
+    clientIdentification: Schema.Attribute.String;
+    clientName: Schema.Attribute.String;
+    confirmationNumber: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    financing: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::financing.financing'
+    >;
+    importBatch: Schema.Attribute.String;
+    importError: Schema.Attribute.Text;
+    importStatus: Schema.Attribute.Enumeration<
+      ['pending', 'processed', 'error', 'duplicate']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    initialDeposit: Schema.Attribute.Decimal;
+    lateFee: Schema.Attribute.Decimal;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::weekly-collection.weekly-collection'
+    > &
+      Schema.Attribute.Private;
+    paymentDate: Schema.Attribute.Date;
+    publishedAt: Schema.Attribute.DateTime;
+    receiptDate: Schema.Attribute.Date;
+    receiptNumber: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    remainingBalance: Schema.Attribute.Decimal;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    verifiedInBank: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    weeklyQuota: Schema.Attribute.Decimal;
+    weekNumber: Schema.Attribute.Integer;
   };
 }
 
@@ -2884,8 +3278,8 @@ export interface PluginUploadFile extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
-    alternativeText: Schema.Attribute.String;
-    caption: Schema.Attribute.String;
+    alternativeText: Schema.Attribute.Text;
+    caption: Schema.Attribute.Text;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -2909,7 +3303,7 @@ export interface PluginUploadFile extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     mime: Schema.Attribute.String & Schema.Attribute.Required;
     name: Schema.Attribute.String & Schema.Attribute.Required;
-    previewUrl: Schema.Attribute.String;
+    previewUrl: Schema.Attribute.Text;
     provider: Schema.Attribute.String & Schema.Attribute.Required;
     provider_metadata: Schema.Attribute.JSON;
     publishedAt: Schema.Attribute.DateTime;
@@ -2918,7 +3312,7 @@ export interface PluginUploadFile extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    url: Schema.Attribute.String & Schema.Attribute.Required;
+    url: Schema.Attribute.Text & Schema.Attribute.Required;
     width: Schema.Attribute.Integer;
   };
 }
@@ -3093,6 +3487,7 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.Private;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
+      Schema.Attribute.Unique &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
@@ -3166,8 +3561,13 @@ declare module '@strapi/strapi' {
       'api::inventory-item.inventory-item': ApiInventoryItemInventoryItem;
       'api::inventory-movement.inventory-movement': ApiInventoryMovementInventoryMovement;
       'api::inventory-note.inventory-note': ApiInventoryNoteInventoryNote;
+      'api::inventory-request.inventory-request': ApiInventoryRequestInventoryRequest;
       'api::invoice.invoice': ApiInvoiceInvoice;
+      'api::maintenance-kit-item.maintenance-kit-item': ApiMaintenanceKitItemMaintenanceKitItem;
+      'api::maintenance-kit.maintenance-kit': ApiMaintenanceKitMaintenanceKit;
       'api::notification.notification': ApiNotificationNotification;
+      'api::payment-application.payment-application': ApiPaymentApplicationPaymentApplication;
+      'api::penalty-debt.penalty-debt': ApiPenaltyDebtPenaltyDebt;
       'api::service-note.service-note': ApiServiceNoteServiceNote;
       'api::service-order-inventory-item.service-order-inventory-item': ApiServiceOrderInventoryItemServiceOrderInventoryItem;
       'api::service-order.service-order': ApiServiceOrderServiceOrder;
@@ -3181,6 +3581,7 @@ declare module '@strapi/strapi' {
       'api::vehicle-document-category.vehicle-document-category': ApiVehicleDocumentCategoryVehicleDocumentCategory;
       'api::vehicle-document.vehicle-document': ApiVehicleDocumentVehicleDocument;
       'api::vehicle-state.vehicle-state': ApiVehicleStateVehicleState;
+      'api::weekly-collection.weekly-collection': ApiWeeklyCollectionWeeklyCollection;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

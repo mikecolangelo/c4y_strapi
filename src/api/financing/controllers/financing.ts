@@ -55,7 +55,7 @@ function getFinancingVariables(financing: any): Record<string, string> {
   const vehicle = financing.vehicle;
   if (vehicle) {
     vars.vehicleInfo = `${vehicle.brand || ''} ${vehicle.model || ''} ${vehicle.year || ''}`.trim();
-    vars.vehiclePlate = vehicle.plate || '';
+    vars.vehiclePlate = vehicle.placa || '';
     vars.vehicleVin = vehicle.vin || '';
   } else {
     vars.vehicleInfo = '';
@@ -376,7 +376,7 @@ export default factories.createCoreController('api::financing.financing', ({ str
         documentId: id,
         populate: {
           client: { fields: ['displayName', 'email', 'phone', 'billingName', 'billingPhone', 'identificationNumber', 'address', 'billingAddress'] },
-          vehicle: { fields: ['brand', 'model', 'year', 'plate', 'vin'] },
+          vehicle: { fields: ['brand', 'model', 'year', 'placa', 'vin'] },
         },
       });
 

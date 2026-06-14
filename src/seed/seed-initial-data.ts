@@ -129,285 +129,137 @@ export const seedInitialData = async (strapi: Core.Strapi) => {
 };
 
 /**
+ * Helper genérico para configurar múltiples permisos para un rol de manera eficiente
+ */
+const configurePermissionsForRole = async (strapi: Core.Strapi, roleType: string, actions: string[]) => {
+  try {
+    const role = await strapi.db.query('plugin::users-permissions.role').findOne({
+      where: { type: roleType },
+    });
+
+    if (!role) {
+      strapi.log.warn(`No se encontró el rol ${roleType}`);
+      return;
+    }
+
+    // Obtener todos los permisos existentes para este rol y estas acciones de una sola vez
+    const existingPermissions = await strapi.db.query('plugin::users-permissions.permission').findMany({
+      where: {
+        role: role.id,
+        action: { $in: actions },
+      },
+    });
+
+    const existingActions = new Set(existingPermissions.map((p: any) => p.action));
+
+    for (const action of actions) {
+      if (!existingActions.has(action)) {
+        await strapi.db.query('plugin::users-permissions.permission').create({
+          data: {
+            action,
+            role: role.id,
+            enabled: true,
+          },
+        });
+        strapi.log.info(`✅ Permiso ${action} creado para rol ${roleType}`);
+      } else {
+        // Usar debug en lugar de info para reducir el ruido en consola
+        strapi.log.debug(`ℹ️ Permiso ${action} ya existe para rol ${roleType}`);
+      }
+    }
+  } catch (error) {
+    strapi.log.error(`Error configurando permisos para el rol ${roleType}:`, error as Error);
+  }
+};
+
+/**
  * Configura permisos de upload para el rol Authenticated
  */
 const configureUploadPermissions = async (strapi: Core.Strapi) => {
-  try {
-    // Obtener el rol Authenticated
-    const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
-      where: { type: 'authenticated' },
-    });
-
-    if (!authenticatedRole) {
-      strapi.log.warn('No se encontró el rol Authenticated');
-      return;
-    }
-
-    // Verificar si ya tiene permisos de upload
-    const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
-      where: {
-        role: authenticatedRole.id,
-        action: 'plugin::upload.content-api.upload',
-      },
-    });
-
-    if (existingPermission) {
-      strapi.log.info('Permisos de upload ya configurados para el rol Authenticated');
-      return;
-    }
-
-    // Crear permiso de upload
-    await strapi.db.query('plugin::users-permissions.permission').create({
-      data: {
-        action: 'plugin::upload.content-api.upload',
-        role: authenticatedRole.id,
-        enabled: true,
-      },
-    });
-
-    // También agregar permiso para acceder a archivos (find y findOne)
-    await strapi.db.query('plugin::users-permissions.permission').create({
-      data: {
-        action: 'plugin::upload.content-api.find',
-        role: authenticatedRole.id,
-        enabled: true,
-      },
-    });
-
-    await strapi.db.query('plugin::users-permissions.permission').create({
-      data: {
-        action: 'plugin::upload.content-api.findOne',
-        role: authenticatedRole.id,
-        enabled: true,
-      },
-    });
-
-    strapi.log.info('Permisos de upload configurados correctamente para el rol Authenticated');
-  } catch (error) {
-    strapi.log.error('Error configurando permisos de upload:', error as Error);
-  }
+  const actions = [
+    'plugin::upload.content-api.upload',
+    'plugin::upload.content-api.find',
+    'plugin::upload.content-api.findOne'
+  ];
+  await configurePermissionsForRole(strapi, 'authenticated', actions);
 };
 
 /**
  * Configura permisos de Service Orders y Appointments para el rol Authenticated
  */
 const configureServicePermissions = async (strapi: Core.Strapi) => {
-  try {
-    const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
-      where: { type: 'authenticated' },
-    });
-
-    if (!authenticatedRole) {
-      strapi.log.warn('No se encontró el rol Authenticated');
-      return;
-    }
-
-    const actions = [
-      'api::service-order.service-order.find',
-      'api::service-order.service-order.findOne',
-      'api::service-order.service-order.create',
-      'api::service-order.service-order.update',
-      'api::service-order.service-order.delete',
-      'api::service-order.service-order.createFromMaintenance',
-      'api::appointment.appointment.find',
-      'api::appointment.appointment.findOne',
-      'api::appointment.appointment.create',
-      'api::appointment.appointment.update',
-      'api::appointment.appointment.delete',
-    ];
-
-    for (const action of actions) {
-      const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
-        where: {
-          role: authenticatedRole.id,
-          action,
-        },
-      });
-
-      if (!existingPermission) {
-        await strapi.db.query('plugin::users-permissions.permission').create({
-          data: {
-            action,
-            role: authenticatedRole.id,
-            enabled: true,
-          },
-        });
-        strapi.log.info(`✅ Permiso ${action} creado para rol Authenticated`);
-      } else {
-        strapi.log.info(`ℹ️ Permiso ${action} ya existe para rol Authenticated`);
-      }
-    }
-
-    strapi.log.info('Permisos de servicio y calendario configurados correctamente');
-  } catch (error) {
-    strapi.log.error('Error configurando permisos de servicio:', error as Error);
-  }
+  const actions = [
+    'api::service-order.service-order.find',
+    'api::service-order.service-order.findOne',
+    'api::service-order.service-order.create',
+    'api::service-order.service-order.update',
+    'api::service-order.service-order.delete',
+    'api::service-order.service-order.createFromMaintenance',
+    'api::appointment.appointment.find',
+    'api::appointment.appointment.findOne',
+    'api::appointment.appointment.create',
+    'api::appointment.appointment.update',
+    'api::appointment.appointment.delete',
+  ];
+  await configurePermissionsForRole(strapi, 'authenticated', actions);
 };
 
 /**
  * Configura permisos para los nuevos content-types de integración Servicios × Inventario
  */
 const configureInventoryIntegrationPermissions = async (strapi: Core.Strapi) => {
-  try {
-    const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
-      where: { type: 'authenticated' },
-    });
-
-    if (!authenticatedRole) {
-      strapi.log.warn('No se encontró el rol Authenticated');
-      return;
-    }
-
-    const actions = [
-      'api::inventory-item.inventory-item.find',
-      'api::inventory-item.inventory-item.findOne',
-      'api::inventory-item.inventory-item.create',
-      'api::inventory-item.inventory-item.update',
-      'api::inventory-item.inventory-item.delete',
-      'api::service-order-inventory-item.service-order-inventory-item.find',
-      'api::service-order-inventory-item.service-order-inventory-item.findOne',
-      'api::service-order-inventory-item.service-order-inventory-item.create',
-      'api::service-order-inventory-item.service-order-inventory-item.update',
-      'api::service-order-inventory-item.service-order-inventory-item.delete',
-      'api::inventory-movement.inventory-movement.find',
-      'api::inventory-movement.inventory-movement.findOne',
-      'api::inventory-movement.inventory-movement.create',
-    ];
-
-    for (const action of actions) {
-      const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
-        where: {
-          role: authenticatedRole.id,
-          action,
-        },
-      });
-
-      if (!existingPermission) {
-        await strapi.db.query('plugin::users-permissions.permission').create({
-          data: {
-            action,
-            role: authenticatedRole.id,
-            enabled: true,
-          },
-        });
-        strapi.log.info(`✅ Permiso ${action} creado para rol Authenticated`);
-      } else {
-        strapi.log.info(`ℹ️ Permiso ${action} ya existe para rol Authenticated`);
-      }
-    }
-
-    strapi.log.info('Permisos de integración Servicios × Inventario configurados correctamente');
-  } catch (error) {
-    strapi.log.error('Error configurando permisos de inventario:', error as Error);
-  }
+  const actions = [
+    'api::inventory-item.inventory-item.find',
+    'api::inventory-item.inventory-item.findOne',
+    'api::inventory-item.inventory-item.create',
+    'api::inventory-item.inventory-item.update',
+    'api::inventory-item.inventory-item.delete',
+    'api::service-order-inventory-item.service-order-inventory-item.find',
+    'api::service-order-inventory-item.service-order-inventory-item.findOne',
+    'api::service-order-inventory-item.service-order-inventory-item.create',
+    'api::service-order-inventory-item.service-order-inventory-item.update',
+    'api::service-order-inventory-item.service-order-inventory-item.delete',
+    'api::inventory-movement.inventory-movement.find',
+    'api::inventory-movement.inventory-movement.findOne',
+    'api::inventory-movement.inventory-movement.create',
+  ];
+  await configurePermissionsForRole(strapi, 'authenticated', actions);
 };
 
 /**
  * Configura permisos para el content-type Inventory Request (solicitudes de piezas)
  */
 const configureInventoryRequestPermissions = async (strapi: Core.Strapi) => {
-  try {
-    const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
-      where: { type: 'authenticated' },
-    });
-
-    if (!authenticatedRole) {
-      strapi.log.warn('No se encontró el rol Authenticated');
-      return;
-    }
-
-    const actions = [
-      'api::inventory-request.inventory-request.find',
-      'api::inventory-request.inventory-request.findOne',
-      'api::inventory-request.inventory-request.create',
-      'api::inventory-request.inventory-request.update',
-      'api::inventory-request.inventory-request.delete',
-      'api::inventory-request.inventory-request.approve',
-      'api::inventory-request.inventory-request.reject',
-      'api::inventory-request.inventory-request.deliver',
-    ];
-
-    for (const action of actions) {
-      const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
-        where: {
-          role: authenticatedRole.id,
-          action,
-        },
-      });
-
-      if (!existingPermission) {
-        await strapi.db.query('plugin::users-permissions.permission').create({
-          data: {
-            action,
-            role: authenticatedRole.id,
-            enabled: true,
-          },
-        });
-        strapi.log.info(`✅ Permiso ${action} creado para rol Authenticated`);
-      } else {
-        strapi.log.info(`ℹ️ Permiso ${action} ya existe para rol Authenticated`);
-      }
-    }
-
-    strapi.log.info('Permisos de Inventory Request configurados correctamente');
-  } catch (error) {
-    strapi.log.error('Error configurando permisos de inventory-request:', error as Error);
-  }
+  const actions = [
+    'api::inventory-request.inventory-request.find',
+    'api::inventory-request.inventory-request.findOne',
+    'api::inventory-request.inventory-request.create',
+    'api::inventory-request.inventory-request.update',
+    'api::inventory-request.inventory-request.delete',
+    'api::inventory-request.inventory-request.approve',
+    'api::inventory-request.inventory-request.reject',
+    'api::inventory-request.inventory-request.deliver',
+  ];
+  await configurePermissionsForRole(strapi, 'authenticated', actions);
 };
 
 /**
  * Configura permisos para Maintenance Kit y Maintenance Kit Item
  */
 const configureMaintenanceKitPermissions = async (strapi: Core.Strapi) => {
-  try {
-    const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
-      where: { type: 'authenticated' },
-    });
-
-    if (!authenticatedRole) {
-      strapi.log.warn('No se encontró el rol Authenticated');
-      return;
-    }
-
-    const actions = [
-      'api::maintenance-kit.maintenance-kit.find',
-      'api::maintenance-kit.maintenance-kit.findOne',
-      'api::maintenance-kit.maintenance-kit.create',
-      'api::maintenance-kit.maintenance-kit.update',
-      'api::maintenance-kit.maintenance-kit.delete',
-      'api::maintenance-kit-item.maintenance-kit-item.find',
-      'api::maintenance-kit-item.maintenance-kit-item.findOne',
-      'api::maintenance-kit-item.maintenance-kit-item.create',
-      'api::maintenance-kit-item.maintenance-kit-item.update',
-      'api::maintenance-kit-item.maintenance-kit-item.delete',
-    ];
-
-    for (const action of actions) {
-      const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
-        where: {
-          role: authenticatedRole.id,
-          action,
-        },
-      });
-
-      if (!existingPermission) {
-        await strapi.db.query('plugin::users-permissions.permission').create({
-          data: {
-            action,
-            role: authenticatedRole.id,
-            enabled: true,
-          },
-        });
-        strapi.log.info(`✅ Permiso ${action} creado para rol Authenticated`);
-      } else {
-        strapi.log.info(`ℹ️ Permiso ${action} ya existe para rol Authenticated`);
-      }
-    }
-
-    strapi.log.info('Permisos de Maintenance Kit configurados correctamente');
-  } catch (error) {
-    strapi.log.error('Error configurando permisos de maintenance-kit:', error as Error);
-  }
+  const actions = [
+    'api::maintenance-kit.maintenance-kit.find',
+    'api::maintenance-kit.maintenance-kit.findOne',
+    'api::maintenance-kit.maintenance-kit.create',
+    'api::maintenance-kit.maintenance-kit.update',
+    'api::maintenance-kit.maintenance-kit.delete',
+    'api::maintenance-kit-item.maintenance-kit-item.find',
+    'api::maintenance-kit-item.maintenance-kit-item.findOne',
+    'api::maintenance-kit-item.maintenance-kit-item.create',
+    'api::maintenance-kit-item.maintenance-kit-item.update',
+    'api::maintenance-kit-item.maintenance-kit-item.delete',
+  ];
+  await configurePermissionsForRole(strapi, 'authenticated', actions);
 };
 
 /**
@@ -511,105 +363,33 @@ const seedMaintenanceKit = async (strapi: Core.Strapi) => {
  * Configura permisos para el content-type Weekly Collection (Cobranza Semanal)
  */
 const configureWeeklyCollectionPermissions = async (strapi: Core.Strapi) => {
-  try {
-    const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
-      where: { type: 'authenticated' },
-    });
-
-    if (!authenticatedRole) {
-      strapi.log.warn('No se encontró el rol Authenticated');
-      return;
-    }
-
-    const actions = [
-      'api::weekly-collection.weekly-collection.find',
-      'api::weekly-collection.weekly-collection.findOne',
-      'api::weekly-collection.weekly-collection.create',
-      'api::weekly-collection.weekly-collection.update',
-      'api::weekly-collection.weekly-collection.delete',
-      'api::weekly-collection.weekly-collection.batchImport',
-    ];
-
-    for (const action of actions) {
-      const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
-        where: {
-          role: authenticatedRole.id,
-          action,
-        },
-      });
-
-      if (!existingPermission) {
-        await strapi.db.query('plugin::users-permissions.permission').create({
-          data: {
-            action,
-            role: authenticatedRole.id,
-            enabled: true,
-          },
-        });
-        strapi.log.info(`✅ Permiso ${action} creado para rol Authenticated`);
-      } else {
-        strapi.log.info(`ℹ️ Permiso ${action} ya existe para rol Authenticated`);
-      }
-    }
-
-    strapi.log.info('Permisos de Cobranza Semanal configurados correctamente');
-  } catch (error) {
-    strapi.log.error('Error configurando permisos de Cobranza Semanal:', error as Error);
-  }
+  const actions = [
+    'api::weekly-collection.weekly-collection.find',
+    'api::weekly-collection.weekly-collection.findOne',
+    'api::weekly-collection.weekly-collection.create',
+    'api::weekly-collection.weekly-collection.update',
+    'api::weekly-collection.weekly-collection.delete',
+    'api::weekly-collection.weekly-collection.batchImport',
+  ];
+  await configurePermissionsForRole(strapi, 'authenticated', actions);
 };
 
 /**
  * Configura permisos para el content-type User Profile (Contactos / Leads)
  */
 const configureUserProfilePermissions = async (strapi: Core.Strapi) => {
-  try {
-    const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
-      where: { type: 'authenticated' },
-    });
-
-    if (!authenticatedRole) {
-      strapi.log.warn('No se encontró el rol Authenticated');
-      return;
-    }
-
-    const actions = [
-      'api::user-profile.user-profile.find',
-      'api::user-profile.user-profile.findOne',
-      'api::user-profile.user-profile.create',
-      'api::user-profile.user-profile.update',
-      'api::user-profile.user-profile.delete',
-      'api::user-profile.user-profile.batchImport',
-      'api::user-profile.user-profile.convert',
-      'api::user-profile.user-profile.account',
-      'api::user-profile.user-profile.resetPassword',
-    ];
-
-    for (const action of actions) {
-      const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
-        where: {
-          role: authenticatedRole.id,
-          action,
-        },
-      });
-
-      if (!existingPermission) {
-        await strapi.db.query('plugin::users-permissions.permission').create({
-          data: {
-            action,
-            role: authenticatedRole.id,
-            enabled: true,
-          },
-        });
-        strapi.log.info(`✅ Permiso ${action} creado para rol Authenticated`);
-      } else {
-        strapi.log.info(`ℹ️ Permiso ${action} ya existe para rol Authenticated`);
-      }
-    }
-
-    strapi.log.info('Permisos de User Profile configurados correctamente');
-  } catch (error) {
-    strapi.log.error('Error configurando permisos de User Profile:', error as Error);
-  }
+  const actions = [
+    'api::user-profile.user-profile.find',
+    'api::user-profile.user-profile.findOne',
+    'api::user-profile.user-profile.create',
+    'api::user-profile.user-profile.update',
+    'api::user-profile.user-profile.delete',
+    'api::user-profile.user-profile.batchImport',
+    'api::user-profile.user-profile.convert',
+    'api::user-profile.user-profile.account',
+    'api::user-profile.user-profile.resetPassword',
+  ];
+  await configurePermissionsForRole(strapi, 'authenticated', actions);
 };
 
 const seedCollection = async (

@@ -95,5 +95,6 @@ export default {
 
     // Seed new isolated vehicle document categories
     await seedVehicleDocumentCategories(strapi);
+
   },
 };

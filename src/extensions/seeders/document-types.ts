@@ -222,8 +222,22 @@ export async function migrateExistingDocuments(strapi: any) {
       return;
     }
 
-    // Obtener todos los documentos
+    // Obtener solo los documentos que necesitan migración o actualización
     const documents = await strapi.entityService.findMany('api::fleet-document.fleet-document', {
+      filters: {
+        $or: [
+          {
+            documentType: {
+              id: { $null: true }
+            }
+          },
+          {
+            documentType: {
+              slug: { $in: obsoleteSlugs }
+            }
+          }
+        ]
+      },
       populate: ['documentType'],
     });
 

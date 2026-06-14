@@ -129,3 +129,12 @@ dist
 build
 .strapi-updater.json
 .strapi-cloud.json
+
+# Backups and scripts
+*.bak
+*.bak.*
+*-debug.js
+*-fix.js
+fix-*.js
+delete-orphans.js
+inspect-db.js
