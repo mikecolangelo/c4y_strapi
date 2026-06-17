@@ -53,8 +53,22 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
     }
   },
 
-  /** Reemplaza la matriz de permisos. Solo debe invocarse por un admin. */
+  /** Reemplaza la matriz de permisos. Solo admin (o API token de servidor). */
   async updateMatrix(ctx) {
+    // Defensa en profundidad: si la petición viene con sesión de usuario (JWT),
+    // exigir que su perfil tenga rol admin. Las peticiones con API token de
+    // servidor (sin ctx.state.user) se consideran de confianza.
+    const user = ctx.state.user;
+    if (user?.email) {
+      const profile = await strapi.db.query('api::user-profile.user-profile').findOne({
+        where: { email: user.email },
+        select: ['role'],
+      });
+      if (profile?.role !== 'admin') {
+        return ctx.forbidden('Solo los administradores pueden modificar los permisos');
+      }
+    }
+
     const { matrix } = ctx.request.body || {};
     if (!matrix || typeof matrix !== 'object') {
       return ctx.badRequest("Se requiere el objeto 'matrix'");
