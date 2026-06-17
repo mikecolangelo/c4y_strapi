@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "role_permissions",
+  "info": {
+    "singularName": "role-permission",
+    "pluralName": "role-permissions",
+    "displayName": "Role Permission",
+    "description": "Permisos por rol y módulo (matriz editable desde Configuración)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "role": {
+      "type": "enumeration",
+      "enum": ["admin", "driver", "lead"],
+      "required": true
+    },
+    "moduleKey": {
+      "type": "string",
+      "required": true
+    },
+    "canAccess": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "canRead": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "canCreate": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "canUpdate": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "canDelete": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    }
+  }
+}

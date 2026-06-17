@@ -2279,6 +2279,53 @@ export interface ApiPenaltyDebtPenaltyDebt extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiRolePermissionRolePermission
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'role_permissions';
+  info: {
+    description: 'Permisos por rol y m\u00F3dulo (matriz editable desde Configuraci\u00F3n)';
+    displayName: 'Role Permission';
+    pluralName: 'role-permissions';
+    singularName: 'role-permission';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    canAccess: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    canCreate: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    canDelete: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    canRead: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    canUpdate: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::role-permission.role-permission'
+    > &
+      Schema.Attribute.Private;
+    moduleKey: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    role: Schema.Attribute.Enumeration<['admin', 'driver', 'lead']> &
+      Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiServiceNoteServiceNote extends Struct.CollectionTypeSchema {
   collectionName: 'service_notes';
   info: {
@@ -3566,6 +3613,7 @@ declare module '@strapi/strapi' {
       'api::notification.notification': ApiNotificationNotification;
       'api::payment-application.payment-application': ApiPaymentApplicationPaymentApplication;
       'api::penalty-debt.penalty-debt': ApiPenaltyDebtPenaltyDebt;
+      'api::role-permission.role-permission': ApiRolePermissionRolePermission;
       'api::service-note.service-note': ApiServiceNoteServiceNote;
       'api::service-order-inventory-item.service-order-inventory-item': ApiServiceOrderInventoryItemServiceOrderInventoryItem;
       'api::service-order.service-order': ApiServiceOrderServiceOrder;

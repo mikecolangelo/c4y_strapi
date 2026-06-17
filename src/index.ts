@@ -96,5 +96,8 @@ export default {
     // Seed new isolated vehicle document categories
     await seedVehicleDocumentCategories(strapi);
 
+    // Seed de permisos por rol y módulo (idempotente)
+    await strapi.service('api::role-permission.role-permission').seedDefaults();
+
   },
 };
