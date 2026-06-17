@@ -168,7 +168,7 @@
     },
     "targetAudience": {
       "type": "enumeration",
-      "enum": ["all", "drivers", "sellers", "admins"],
+      "enum": ["all", "drivers", "admins"],
       "default": "all",
       "required": false,
       "description": "Audiencia objetivo del anuncio (usado cuando type='announcement')"

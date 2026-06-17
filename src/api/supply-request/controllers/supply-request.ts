@@ -143,7 +143,7 @@ export default factories.createCoreController('api::supply-request.supply-reques
     return { data: result };
   },
 
-  // Helper para verificar permisos (admin o seller)
+  // Helper para verificar permisos (solo admin)
   async checkAdminOrSellerPermission(ctx): Promise<PermissionCheckResult> {
     const user = ctx.state.user;
     const userRoleHeader = ctx.request.headers['x-user-role'];
@@ -155,20 +155,20 @@ export default factories.createCoreController('api::supply-request.supply-reques
         where: { email: user.email }
       });
       
-      if (!userProfile || !['admin', 'seller'].includes(userProfile.role)) {
-        return { 
-          allowed: false, 
-          error: ctx.forbidden('Solo administradores y vendedores pueden realizar esta acción') 
+      if (!userProfile || !['admin'].includes(userProfile.role)) {
+        return {
+          allowed: false,
+          error: ctx.forbidden('Solo administradores pueden realizar esta acción')
         };
       }
-      
+
       return { allowed: true, userProfile };
     }
-    
+
     // Si no hay usuario JWT, verificar por API Token + header x-user-role
     // El API Token ya fue verificado por el middleware de Strapi
-    if (userRole && ['admin', 'seller'].includes(userRole)) {
-      // Buscar un usuario con rol admin o seller para asignar como aprobador
+    if (userRole && ['admin'].includes(userRole)) {
+      // Buscar un usuario con rol admin para asignar como aprobador
       const userProfile = await strapi.db.query('api::user-profile.user-profile').findOne({
         where: { role: userRole },
         orderBy: { id: 'asc' }

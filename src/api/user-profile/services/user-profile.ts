@@ -57,7 +57,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
    * que no sea lead y que no tenga userAccount vinculado.
    * Reutiliza la logica de promoteLeadToUser pero sin la restriccion de role === 'lead'.
    */
-  async createAccountForProfile(profileDocumentId: string, targetRole: 'admin' | 'seller' | 'driver', customPassword?: string) {
+  async createAccountForProfile(profileDocumentId: string, targetRole: 'admin' | 'driver', customPassword?: string) {
     // 1. Buscar el perfil
     const profile = await strapi.db.query('api::user-profile.user-profile').findOne({
       where: { documentId: profileDocumentId },
@@ -175,7 +175,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
   /**
    * Promueve un lead a usuario nativo de Strapi
    */
-  async promoteLeadToUser(leadDocumentId: string, targetRole: 'admin' | 'seller' | 'driver', customPassword?: string) {
+  async promoteLeadToUser(leadDocumentId: string, targetRole: 'admin' | 'driver', customPassword?: string) {
     // 1. Buscar el lead por documentId con su cuenta de usuario si existe
     const lead = await strapi.db.query('api::user-profile.user-profile').findOne({
       where: { documentId: leadDocumentId },

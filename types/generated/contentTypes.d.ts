@@ -2107,9 +2107,7 @@ export interface ApiNotificationNotification
     scheduledDate: Schema.Attribute.DateTime;
     startDate: Schema.Attribute.DateTime;
     tags: Schema.Attribute.JSON;
-    targetAudience: Schema.Attribute.Enumeration<
-      ['all', 'drivers', 'sellers', 'admins']
-    > &
+    targetAudience: Schema.Attribute.Enumeration<['all', 'drivers', 'admins']> &
       Schema.Attribute.DefaultTo<'all'>;
     timestamp: Schema.Attribute.DateTime & Schema.Attribute.Required;
     title: Schema.Attribute.String & Schema.Attribute.Required;
@@ -2826,7 +2824,7 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::fleet.fleet'
     >;
-    role: Schema.Attribute.Enumeration<['admin', 'seller', 'driver', 'lead']> &
+    role: Schema.Attribute.Enumeration<['admin', 'driver', 'lead']> &
       Schema.Attribute.Required;
     serviceNotes: Schema.Attribute.Relation<
       'oneToMany',

@@ -2,7 +2,6 @@ import type { Core } from '@strapi/strapi';
 
 const PROFILE_SEEDS = [
   { displayName: 'Administrador', role: 'admin', email: 'admin@example.com', phone: '+34 600 000 000' },
-  { displayName: 'Vendedor Demo', role: 'seller', email: 'seller@example.com', phone: '+34 600 000 111' },
   { displayName: 'Conductor Demo', role: 'driver', email: 'driver@example.com', phone: '+34 600 000 222' }
 ];
 
