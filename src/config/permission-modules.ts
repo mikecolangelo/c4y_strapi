@@ -78,8 +78,8 @@ const none = (): ModulePermission => ({
 /**
  * Matriz por defecto.
  * - admin: acceso total a todo.
- * - driver (Usuario): solo su panel, perfil, notificaciones y vistas de
- *   lectura de su financiamiento (billing), su auto (fleet) y calendario.
+ * - driver (Usuario): solo lo mínimo — su panel (/dashboard-user),
+ *   notificaciones y perfil. Sin acceso a flota, facturación ni calendario.
  * - lead: sin acceso al portal.
  */
 export const DEFAULT_MATRIX: Record<PermissionRole, RoleMatrix> = {
@@ -92,9 +92,9 @@ export const DEFAULT_MATRIX: Record<PermissionRole, RoleMatrix> = {
     users: none(),
     'adm-services': none(),
     stock: none(),
-    fleet: readOnly(),
-    billing: readOnly(),
-    calendar: readOnly(),
+    fleet: none(),
+    billing: none(),
+    calendar: none(),
     deal: none(),
     'service-orders': none(),
     notifications: { canAccess: true, canRead: true, canCreate: true, canUpdate: true, canDelete: false },
