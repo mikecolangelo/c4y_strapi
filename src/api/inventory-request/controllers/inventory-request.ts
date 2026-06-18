@@ -146,17 +146,17 @@ export default factories.createCoreController('api::inventory-request.inventory-
         where: { email: user.email }
       });
 
-      if (!userProfile || !['admin', 'seller'].includes(userProfile.role)) {
+      if (!userProfile || !['admin'].includes(userProfile.role)) {
         return {
           allowed: false,
-          error: ctx.forbidden('Solo administradores y vendedores pueden realizar esta acción')
+          error: ctx.forbidden('Solo administradores pueden realizar esta acción')
         };
       }
 
       return { allowed: true, userProfile };
     }
 
-    if (userRole && ['admin', 'seller'].includes(userRole)) {
+    if (userRole && ['admin'].includes(userRole)) {
       const userProfile = await strapi.db.query('api::user-profile.user-profile').findOne({
         where: { role: userRole },
         orderBy: { id: 'asc' }

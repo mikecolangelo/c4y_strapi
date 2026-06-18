@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'seller' | 'driver';
+export type Role = 'admin' | 'driver';
 export type Resource =
   | 'fleet'
   | 'deal'
@@ -24,18 +24,6 @@ const ROLE_MATRIX: Record<Role, Partial<Record<Resource, Permission[]>>> = {
     'service-order': ['read', 'create', 'update', 'delete'],
     'supply-item': ['read', 'create', 'update', 'delete'],
     'supply-request': ['read', 'create', 'update', 'delete'],
-  },
-  seller: {
-    fleet: ['read', 'update'],
-    deal: ['read', 'create', 'update'],
-    billing: ['read', 'create', 'update'],
-    appointment: ['read', 'create', 'update'],
-    inventory: ['read'],
-    notification: ['read', 'create', 'update'],
-    profile: ['read', 'update'],
-    'service-order': ['read', 'create', 'update', 'delete'],
-    'supply-item': ['read'],
-    'supply-request': ['read', 'create', 'update'],
   },
   driver: {
     fleet: ['read'],

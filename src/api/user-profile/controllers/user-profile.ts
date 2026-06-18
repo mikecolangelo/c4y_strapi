@@ -6,7 +6,7 @@ import { factories } from '@strapi/strapi';
 
 export default factories.createCoreController('api::user-profile.user-profile', ({ strapi }) => ({
   /**
-   * Sobreescribe create para que contactos con rol activo (admin/seller/driver)
+   * Sobreescribe create para que contactos con rol activo (admin/driver)
    * automaticamente obtengan una cuenta nativa de users-permissions vinculada.
    */
   async create(ctx) {
@@ -22,9 +22,9 @@ export default factories.createCoreController('api::user-profile.user-profile', 
     }
 
     // Validar rol
-    const validRoles = ['admin', 'seller', 'driver'];
+    const validRoles = ['admin', 'driver'];
     if (!validRoles.includes(data.role)) {
-      return ctx.badRequest('Rol invalido. Debe ser admin, seller, driver o lead');
+      return ctx.badRequest('Rol invalido. Debe ser admin, driver o lead');
     }
 
     const userService = strapi.plugin('users-permissions').service('user');
@@ -129,8 +129,8 @@ export default factories.createCoreController('api::user-profile.user-profile', 
       return ctx.badRequest('Se requiere el documentId');
     }
 
-    if (!targetRole || !['admin', 'seller', 'driver'].includes(targetRole)) {
-      return ctx.badRequest('targetRole inválido. Debe ser admin, seller o driver');
+    if (!targetRole || !['admin', 'driver'].includes(targetRole)) {
+      return ctx.badRequest('targetRole inválido. Debe ser admin o driver');
     }
 
     try {
@@ -157,8 +157,8 @@ export default factories.createCoreController('api::user-profile.user-profile', 
       return ctx.badRequest('Se requiere el documentId');
     }
 
-    if (!targetRole || !['admin', 'seller', 'driver'].includes(targetRole)) {
-      return ctx.badRequest('targetRole inválido. Debe ser admin, seller o driver');
+    if (!targetRole || !['admin', 'driver'].includes(targetRole)) {
+      return ctx.badRequest('targetRole inválido. Debe ser admin o driver');
     }
 
     try {
@@ -334,10 +334,10 @@ export default factories.createCoreController('api::user-profile.user-profile', 
 
           // Determinar rol: solo admins pueden importar roles distintos a 'lead'
           const requestedRole = row.role ? String(row.role).toLowerCase().trim() : null;
-          const allowedRoles = ['admin', 'seller', 'driver', 'lead'];
+          const allowedRoles = ['admin', 'driver', 'lead'];
           const effectiveRole = (isAdmin && requestedRole && allowedRoles.includes(requestedRole)
             ? requestedRole
-            : 'lead') as 'admin' | 'seller' | 'driver' | 'lead';
+            : 'lead') as 'admin' | 'driver' | 'lead';
 
           // Crear el lead
           const payload = {

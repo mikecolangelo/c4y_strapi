@@ -65,6 +65,51 @@ const normalizeFleetIdSequence = async (strapi: Core.Strapi) => {
   }
 };
 
+/**
+ * Otorga al rol "Authenticated" acceso a los endpoints de role-permission.
+ * Por defecto Strapi deja deshabilitadas las rutas de content-types nuevos,
+ * por lo que el sidebar/middleware (que llaman /mine con el JWT del usuario)
+ * recibirían 403. Idempotente: solo crea los permisos que falten.
+ */
+const grantRolePermissionAccess = async (strapi: Core.Strapi) => {
+  try {
+    const authRole = await strapi.db
+      .query('plugin::users-permissions.role')
+      .findOne({ where: { type: 'authenticated' } });
+
+    if (!authRole) {
+      strapi.log.warn('[permisos] No se encontró el rol Authenticated');
+      return;
+    }
+
+    const actions = [
+      'api::role-permission.role-permission.mine',
+      'api::role-permission.role-permission.matrix',
+      'api::role-permission.role-permission.modules',
+      'api::role-permission.role-permission.updateMatrix',
+    ];
+
+    let granted = 0;
+    for (const action of actions) {
+      const existing = await strapi.db
+        .query('plugin::users-permissions.permission')
+        .findOne({ where: { action, role: authRole.id } });
+      if (!existing) {
+        await strapi.db
+          .query('plugin::users-permissions.permission')
+          .create({ data: { action, role: authRole.id } });
+        granted++;
+      }
+    }
+
+    if (granted > 0) {
+      strapi.log.info(`[permisos] ${granted} endpoints de role-permission habilitados para Authenticated`);
+    }
+  } catch (error) {
+    strapi.log.error('[permisos] Error otorgando acceso a role-permission:', error as Error);
+  }
+};
+
 export default {
   /**
    * An asynchronous register function that runs before
@@ -95,6 +140,12 @@ export default {
 
     // Seed new isolated vehicle document categories
     await seedVehicleDocumentCategories(strapi);
+
+    // Seed de permisos por rol y módulo (idempotente)
+    await strapi.service('api::role-permission.role-permission').seedDefaults();
+
+    // Habilitar endpoints de role-permission para el rol Authenticated
+    await grantRolePermissionAccess(strapi);
 
   },
 };
