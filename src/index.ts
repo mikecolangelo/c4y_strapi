@@ -8,6 +8,7 @@ import {
   ROLE_PERMISSION_ACTIONS,
   SERVICE_CATALOG_ACTIONS,
   USER_COMMENT_ACTIONS,
+  USER_PROFILE_ACTIONS,
 } from './extensions/permissions/authenticated-access';
 
 type SequenceMaxResult = { max?: string | number | null };
@@ -108,5 +109,6 @@ export default {
     await ensureAuthenticatedPermissions(strapi, ROLE_PERMISSION_ACTIONS, 'role-permission');
     await ensureAuthenticatedPermissions(strapi, SERVICE_CATALOG_ACTIONS, 'service');
     await ensureAuthenticatedPermissions(strapi, USER_COMMENT_ACTIONS, 'user-comment');
+    await ensureAuthenticatedPermissions(strapi, USER_PROFILE_ACTIONS, 'user-profile');
   },
 };

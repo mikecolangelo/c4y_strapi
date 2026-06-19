@@ -2310,6 +2310,8 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
     serviceOrders: Schema.Attribute.Relation<'oneToMany', 'api::service-order.service-order'>;
     specialties: Schema.Attribute.Text;
     supplyRequests: Schema.Attribute.Relation<'oneToMany', 'api::supply-request.supply-request'>;
+    themePreference: Schema.Attribute.Enumeration<['light', 'dark', 'system']> &
+      Schema.Attribute.DefaultTo<'light'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     userAccount: Schema.Attribute.Relation<'oneToOne', 'plugin::users-permissions.user'> &

@@ -26,6 +26,17 @@ export const USER_COMMENT_ACTIONS = [
   'api::user-comment.user-comment.delete',
 ] as const;
 
+/**
+ * REST actions the panel needs on the user-profile content-type: listing and
+ * reading contacts, plus updating (used by contact editing and by persisting
+ * each user's theme preference).
+ */
+export const USER_PROFILE_ACTIONS = [
+  'api::user-profile.user-profile.find',
+  'api::user-profile.user-profile.findOne',
+  'api::user-profile.user-profile.update',
+] as const;
+
 /** Custom role-permission endpoints consumed by the sidebar/middleware. */
 export const ROLE_PERMISSION_ACTIONS = [
   'api::role-permission.role-permission.mine',
