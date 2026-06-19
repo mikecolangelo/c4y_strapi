@@ -12,8 +12,22 @@
     "start": "strapi start",
     "strapi": "strapi",
     "test": "vitest run",
+    "lint": "eslint \"src/**/*.{ts,js}\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky",
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@strapi/plugin-cloud": "5.33.3",
@@ -30,13 +44,24 @@
     "styled-components": "6.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "21.0.2",
+    "@commitlint/config-conventional": "21.0.2",
+    "@eslint/js": "9.39.4",
     "@types/koa": "^2.15.0",
     "@types/node": "20",
     "@types/nodemailer": "^8.0.0",
     "@types/react": "18",
     "@types/react-dom": "18",
     "baseline-browser-mapping": "^2.10.35",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-unused-imports": "4.4.1",
+    "globals": "17.6.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.0.7",
+    "prettier": "3.8.4",
     "typescript": "5",
+    "typescript-eslint": "8.61.1",
     "vite": "^5.4.19",
     "vitest": "4.0.15"
   },
