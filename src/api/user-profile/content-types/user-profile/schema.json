@@ -133,6 +133,12 @@
       "target": "api::inventory-note.inventory-note",
       "mappedBy": "author"
     },
+    "comments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::user-comment.user-comment",
+      "mappedBy": "subject"
+    },
     "assignedVehicles": {
       "type": "relation",
       "relation": "manyToMany",

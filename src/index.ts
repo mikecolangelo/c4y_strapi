@@ -7,6 +7,7 @@ import {
   ensureAuthenticatedPermissions,
   ROLE_PERMISSION_ACTIONS,
   SERVICE_CATALOG_ACTIONS,
+  USER_COMMENT_ACTIONS,
 } from './extensions/permissions/authenticated-access';
 
 type SequenceMaxResult = { max?: string | number | null };
@@ -51,9 +52,7 @@ const normalizeFleetIdSequence = async (strapi: Core.Strapi) => {
   const sequenceName = `${tableName}_id_seq`;
 
   try {
-    await strapi.db.connection.raw(
-      `ALTER SEQUENCE "${schema}"."${sequenceName}" INCREMENT BY 1;`
-    );
+    await strapi.db.connection.raw(`ALTER SEQUENCE "${schema}"."${sequenceName}" INCREMENT BY 1;`);
 
     const [result] = (await strapi.db
       .connection(tableName)
@@ -93,7 +92,7 @@ export default {
     await ensureOtpCodesTable(strapi);
     await normalizeFleetIdSequence(strapi);
     await seedInitialData(strapi);
-    
+
     // Seed document types and migrate existing documents
     await seedDocumentTypes(strapi);
     await migrateExistingDocuments(strapi);
@@ -108,6 +107,6 @@ export default {
     // service catalog endpoints (Strapi disables new content-types by default).
     await ensureAuthenticatedPermissions(strapi, ROLE_PERMISSION_ACTIONS, 'role-permission');
     await ensureAuthenticatedPermissions(strapi, SERVICE_CATALOG_ACTIONS, 'service');
-
+    await ensureAuthenticatedPermissions(strapi, USER_COMMENT_ACTIONS, 'user-comment');
   },
 };

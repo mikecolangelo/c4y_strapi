@@ -18,6 +18,14 @@ export const SERVICE_CATALOG_ACTIONS = [
   'api::service.service.delete',
 ] as const;
 
+/** REST actions the panel needs for the contact (user) comment timeline. */
+export const USER_COMMENT_ACTIONS = [
+  'api::user-comment.user-comment.find',
+  'api::user-comment.user-comment.findOne',
+  'api::user-comment.user-comment.create',
+  'api::user-comment.user-comment.delete',
+] as const;
+
 /** Custom role-permission endpoints consumed by the sidebar/middleware. */
 export const ROLE_PERMISSION_ACTIONS = [
   'api::role-permission.role-permission.mine',
@@ -36,7 +44,7 @@ export const ROLE_PERMISSION_ACTIONS = [
 export async function ensureAuthenticatedPermissions(
   strapi: Core.Strapi,
   actions: readonly string[],
-  label?: string,
+  label?: string
 ): Promise<number> {
   try {
     const authRole = await strapi.db
@@ -68,7 +76,10 @@ export async function ensureAuthenticatedPermissions(
 
     return granted;
   } catch (error) {
-    strapi.log.error(`[permissions] Failed to grant ${label ?? 'authenticated'} access:`, error as Error);
+    strapi.log.error(
+      `[permissions] Failed to grant ${label ?? 'authenticated'} access:`,
+      error as Error
+    );
     return 0;
   }
 }
