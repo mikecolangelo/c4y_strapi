@@ -142,3 +142,5 @@ build
 fix-*.js
 delete-orphans.js
 inspect-db.js
+# Database backups (local safety nets, never commit)
+backups/

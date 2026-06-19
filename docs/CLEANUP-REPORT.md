@@ -1,10 +1,33 @@
-# Database & Content-Type Cleanup Report (proposal only)
+# Database & Content-Type Cleanup Report
 
-> **Status: PROPOSAL — nothing has been deleted.**
-> This document lists candidates for removal so the owner can approve them. No
-> destructive change (dropping a table/column, deleting a content-type) has been
-> applied. Apply only after taking the backups described below and approving the
-> specific items.
+> **Status: PHASE 1 EXECUTED (owner-approved) — see "Execution log" below.**
+> The remaining items in this document are still proposals; only the
+> strong-safe candidates were removed, after a full backup.
+
+## Execution log
+
+### 2026-06-19 — Phase 1: remove junk content-types (owner-approved)
+
+Backup taken first: `backend/backups/main_car4youpanama_20260619_231114.sql`
+(full `pg_dump`, git-ignored). Removed 5 unused/typo content-types and their
+tables (49 → 44 content-types):
+
+| Content-type       | Folder removed             | Tables dropped                           | Rows before |
+| ------------------ | -------------------------- | ---------------------------------------- | ----------- |
+| `singin` (typo)    | `src/api/singin`           | `singins`, `singins_cmps`                | 2           |
+| `signup` (typo)    | `src/api/signup`           | `signups`, `signups_cmps`                | 2           |
+| `dashboard`        | `src/api/dashboard`        | `dashboards`, `dashboards_cmps`          | 2           |
+| `dashboard-metric` | `src/api/dashboard-metric` | `dashboard_metrics`                      | 0           |
+| `stat-entry`       | `src/api/stat-entry`       | `stat_entries`, `stat_entries_owner_lnk` | 0           |
+
+Verified: no code/relation references in either repo, types regenerated, `tsc`
+clean. Restore from the backup file above if needed.
+
+---
+
+> **Remaining items below: PROPOSAL — not yet deleted.**
+> They list further candidates for the owner to approve. Apply only after taking
+> the backups described below and approving the specific items.
 
 Generated for Strapi 5.33.3, database `main_car4youpanama` (PostgreSQL), on the
 `chore/servicios-cleanup-refactor` branch.

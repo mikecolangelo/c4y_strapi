@@ -736,64 +736,6 @@ export interface ApiContractTypeContractType extends Struct.CollectionTypeSchema
   };
 }
 
-export interface ApiDashboardMetricDashboardMetric extends Struct.CollectionTypeSchema {
-  collectionName: 'dashboard_metrics';
-  info: {
-    displayName: 'Dashboard Metric';
-    pluralName: 'dashboard-metrics';
-    singularName: 'dashboard-metric';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    category: Schema.Attribute.String & Schema.Attribute.Required;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::dashboard-metric.dashboard-metric'
-    > &
-      Schema.Attribute.Private;
-    meta: Schema.Attribute.JSON;
-    periodType: Schema.Attribute.Enumeration<['today', 'week', 'month', 'year']> &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'today'>;
-    periodValue: Schema.Attribute.String;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    value: Schema.Attribute.Decimal & Schema.Attribute.Required;
-  };
-}
-
-export interface ApiDashboardDashboard extends Struct.SingleTypeSchema {
-  collectionName: 'dashboards';
-  info: {
-    displayName: 'Dashboard';
-    pluralName: 'dashboards';
-    singularName: 'dashboard';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
-    favicon: Schema.Attribute.Media<'images' | 'files'>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::dashboard.dashboard'> &
-      Schema.Attribute.Private;
-    publishedAt: Schema.Attribute.DateTime;
-    sections: Schema.Attribute.DynamicZone<['layout.hero-section']>;
-    title: Schema.Attribute.String;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-  };
-}
-
 export interface ApiDealClauseDealClause extends Struct.CollectionTypeSchema {
   collectionName: 'deal_clauses';
   info: {
@@ -2023,86 +1965,6 @@ export interface ApiServiceService extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiSignupSignup extends Struct.SingleTypeSchema {
-  collectionName: 'signups';
-  info: {
-    displayName: 'Sign Up';
-    pluralName: 'signups';
-    singularName: 'signup';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    Description: Schema.Attribute.Text;
-    header: Schema.Attribute.Component<'metada.header', true>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::signup.signup'> &
-      Schema.Attribute.Private;
-    publishedAt: Schema.Attribute.DateTime;
-    sections: Schema.Attribute.DynamicZone<['layout.singup-form']>;
-    Title: Schema.Attribute.String;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-  };
-}
-
-export interface ApiSinginSingin extends Struct.SingleTypeSchema {
-  collectionName: 'singins';
-  info: {
-    displayName: 'Sign In';
-    pluralName: 'singins';
-    singularName: 'singin';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    description: Schema.Attribute.String;
-    header: Schema.Attribute.Component<'metada.header', false>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::singin.singin'> &
-      Schema.Attribute.Private;
-    publishedAt: Schema.Attribute.DateTime;
-    sections: Schema.Attribute.DynamicZone<['layout.singin-form']>;
-    title: Schema.Attribute.String;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-  };
-}
-
-export interface ApiStatEntryStatEntry extends Struct.CollectionTypeSchema {
-  collectionName: 'stat_entries';
-  info: {
-    displayName: 'Stat Entry';
-    pluralName: 'stat-entries';
-    singularName: 'stat-entry';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    appointmentsCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    dailyBreakdown: Schema.Attribute.JSON;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::stat-entry.stat-entry'> &
-      Schema.Attribute.Private;
-    owner: Schema.Attribute.Relation<'manyToOne', 'api::user-profile.user-profile'>;
-    publishedAt: Schema.Attribute.DateTime;
-    salesAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<'0'>;
-    servicesAmount: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<'0'>;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    weekRange: Schema.Attribute.String & Schema.Attribute.Required;
-  };
-}
-
 export interface ApiSupplyItemSupplyItem extends Struct.CollectionTypeSchema {
   collectionName: 'supply_items';
   info: {
@@ -2902,8 +2764,6 @@ declare module '@strapi/strapi' {
       'api::configuration.configuration': ApiConfigurationConfiguration;
       'api::contract-document.contract-document': ApiContractDocumentContractDocument;
       'api::contract-type.contract-type': ApiContractTypeContractType;
-      'api::dashboard-metric.dashboard-metric': ApiDashboardMetricDashboardMetric;
-      'api::dashboard.dashboard': ApiDashboardDashboard;
       'api::deal-clause.deal-clause': ApiDealClauseDealClause;
       'api::deal-discount.deal-discount': ApiDealDiscountDealDiscount;
       'api::deal.deal': ApiDealDeal;
@@ -2931,9 +2791,6 @@ declare module '@strapi/strapi' {
       'api::service-order-inventory-item.service-order-inventory-item': ApiServiceOrderInventoryItemServiceOrderInventoryItem;
       'api::service-order.service-order': ApiServiceOrderServiceOrder;
       'api::service.service': ApiServiceService;
-      'api::signup.signup': ApiSignupSignup;
-      'api::singin.singin': ApiSinginSingin;
-      'api::stat-entry.stat-entry': ApiStatEntryStatEntry;
       'api::supply-item.supply-item': ApiSupplyItemSupplyItem;
       'api::supply-request.supply-request': ApiSupplyRequestSupplyRequest;
       'api::user-comment.user-comment': ApiUserCommentUserComment;
