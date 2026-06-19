@@ -2,10 +2,16 @@
  * fleet controller
  */
 
-import { factories } from '@strapi/strapi'
+import { factories } from '@strapi/strapi';
 
 function sanitizeFleetEntity(entity: any) {
-  const relationFields = ['responsables', 'assignedDrivers', 'interestedDrivers', 'currentDrivers', 'interestedPersons'];
+  const relationFields = [
+    'responsables',
+    'assignedDrivers',
+    'interestedDrivers',
+    'currentDrivers',
+    'interestedPersons',
+  ];
   for (const field of relationFields) {
     if (Array.isArray(entity[field])) {
       entity[field] = entity[field].map((item: any) => {
@@ -21,7 +27,6 @@ function sanitizeFleetEntity(entity: any) {
 }
 
 export default factories.createCoreController('api::fleet.fleet', ({ strapi }) => ({
-
   async findOne(ctx) {
     const documentId = ctx.params.id;
     if (!documentId) {
@@ -46,7 +51,7 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
       const sanitized = sanitizeFleetEntity(entity);
       return this.transformResponse(sanitized);
     } catch (error) {
-      console.error('Error obteniendo vehículo:', error);
+      strapi.log.error('Error obteniendo vehículo:', error);
       return ctx.badRequest('Error al obtener el vehículo: ' + (error as Error).message);
     }
   },
@@ -70,7 +75,12 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
 
       const internalId = vehicle.id;
 
-      const relationFields = ['responsables', 'assignedDrivers', 'interestedDrivers', 'currentDrivers'];
+      const relationFields = [
+        'responsables',
+        'assignedDrivers',
+        'interestedDrivers',
+        'currentDrivers',
+      ];
       const scalarData: any = {};
       const relationsData: Record<string, number[]> = {};
 
@@ -93,10 +103,26 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
       }
 
       const relationMappings: Record<string, { table: string; col1: string; col2: string }> = {
-        responsables: { table: 'fleets_responsables_lnk', col1: 'fleet_id', col2: 'user_profile_id' },
-        assignedDrivers: { table: 'user_profiles_assigned_vehicles_lnk', col1: 'fleet_id', col2: 'user_profile_id' },
-        interestedDrivers: { table: 'user_profiles_interested_vehicles_lnk', col1: 'fleet_id', col2: 'user_profile_id' },
-        currentDrivers: { table: 'fleets_current_drivers_lnk', col1: 'fleet_id', col2: 'user_profile_id' },
+        responsables: {
+          table: 'fleets_responsables_lnk',
+          col1: 'fleet_id',
+          col2: 'user_profile_id',
+        },
+        assignedDrivers: {
+          table: 'user_profiles_assigned_vehicles_lnk',
+          col1: 'fleet_id',
+          col2: 'user_profile_id',
+        },
+        interestedDrivers: {
+          table: 'user_profiles_interested_vehicles_lnk',
+          col1: 'fleet_id',
+          col2: 'user_profile_id',
+        },
+        currentDrivers: {
+          table: 'fleets_current_drivers_lnk',
+          col1: 'fleet_id',
+          col2: 'user_profile_id',
+        },
       };
 
       for (const [field, ids] of Object.entries(relationsData)) {
@@ -130,7 +156,7 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
       const sanitized = sanitizeFleetEntity(entity);
       return this.transformResponse(sanitized);
     } catch (error) {
-      console.error('Error actualizando vehículo:', error);
+      strapi.log.error('Error actualizando vehículo:', error);
       return ctx.badRequest('Error al actualizando el vehículo: ' + (error as Error).message);
     }
   },
@@ -172,7 +198,9 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
         const vehicleUpdatedAt = new Date(vehicle.updatedAt).getTime();
         const clientUpdatedAt = new Date(lastKnownUpdatedAt).getTime();
         if (vehicleUpdatedAt !== clientUpdatedAt) {
-          return ctx.conflict('El vehículo fue modificado por otro usuario. Recarga y vuelve a intentarlo.');
+          return ctx.conflict(
+            'El vehículo fue modificado por otro usuario. Recarga y vuelve a intentarlo.'
+          );
         }
       }
 
@@ -209,13 +237,22 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
       // Verificar recordatorios de aceite en segundo plano
       try {
         const fleetReminderService = strapi.service('api::fleet-reminder.fleet-reminder');
-        if (fleetReminderService && typeof fleetReminderService.checkMileageReminders === 'function') {
+        if (
+          fleetReminderService &&
+          typeof fleetReminderService.checkMileageReminders === 'function'
+        ) {
           fleetReminderService.checkMileageReminders(vehicle.id, mileageValue).catch((err: any) => {
-            strapi.log.error(`[setMileageRecord] Error verificando recordatorios para vehículo ${documentId}:`, err);
+            strapi.log.error(
+              `[setMileageRecord] Error verificando recordatorios para vehículo ${documentId}:`,
+              err
+            );
           });
         }
       } catch (reminderError) {
-        strapi.log.error(`[setMileageRecord] Error iniciando verificación de recordatorios para vehículo ${documentId}:`, reminderError);
+        strapi.log.error(
+          `[setMileageRecord] Error iniciando verificación de recordatorios para vehículo ${documentId}:`,
+          reminderError
+        );
       }
 
       return ctx.send({
@@ -227,7 +264,7 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
         },
       });
     } catch (error) {
-      console.error('Error actualizando kilometraje:', error);
+      strapi.log.error('Error actualizando kilometraje:', error);
       return ctx.internalServerError('Error al actualizar el kilometraje');
     }
   },
@@ -291,7 +328,7 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
         },
       });
     } catch (error) {
-      console.error('Error registrando cambio de aceite:', error);
+      strapi.log.error('Error registrando cambio de aceite:', error);
       return ctx.internalServerError('Error al registrar el cambio de aceite');
     }
   },
@@ -313,18 +350,21 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
         return ctx.notFound('Vehículo no encontrado');
       }
 
-      const history = await strapi.entityService.findMany('api::fleet-mileage-history.fleet-mileage-history', {
-        filters: {
-          vehicle: { id: { $eq: vehicle.id } },
-        },
-        sort: { createdAt: 'desc' },
-      });
+      const history = await strapi.entityService.findMany(
+        'api::fleet-mileage-history.fleet-mileage-history',
+        {
+          filters: {
+            vehicle: { id: { $eq: vehicle.id } },
+          },
+          sort: { createdAt: 'desc' },
+        }
+      );
 
       return ctx.send({
         data: history || [],
       });
     } catch (error) {
-      console.error('Error obteniendo historial de kilometraje:', error);
+      strapi.log.error('Error obteniendo historial de kilometraje:', error);
       return ctx.internalServerError('Error al obtener el historial de kilometraje');
     }
   },
@@ -346,15 +386,15 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
       }
 
       const fleetReminderService = strapi.service('api::fleet-reminder.fleet-reminder');
-      if (!fleetReminderService || typeof fleetReminderService.checkMileageReminders !== 'function') {
+      if (
+        !fleetReminderService ||
+        typeof fleetReminderService.checkMileageReminders !== 'function'
+      ) {
         return ctx.internalServerError('Servicio de recordatorios no disponible');
       }
 
       const currentMileage = parseInt(vehicle.currentMileage || 0, 10);
-      const result = await fleetReminderService.checkMileageReminders(
-        vehicle.id,
-        currentMileage
-      );
+      const result = await fleetReminderService.checkMileageReminders(vehicle.id, currentMileage);
 
       return ctx.send({
         data: {
@@ -364,7 +404,7 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
         },
       });
     } catch (error) {
-      console.error('Error verificando recordatorios:', error);
+      strapi.log.error('Error verificando recordatorios:', error);
       return ctx.internalServerError('Error al verificar recordatorios');
     }
   },

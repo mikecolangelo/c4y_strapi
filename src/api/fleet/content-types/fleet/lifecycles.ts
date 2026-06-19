@@ -1,6 +1,6 @@
 /**
  * Lifecycle hooks for fleet (Vehículos de flota)
- * 
+ *
  * Calcula automáticamente billingInitials si está vacío:
  * - Base: Primera letra de Marca + Primera letra de Modelo (ej: Ford Mustang → FM)
  * - Si existe duplicado: Añadir letras del modelo hasta obtener sigla única
@@ -57,7 +57,7 @@ const checkInitialsExists = async (
     const existing = await strapi.db.query('api::fleet.fleet').findOne(query);
     return !!existing;
   } catch (error) {
-    console.error('[checkInitialsExists] Error:', error);
+    strapi.log.error('[checkInitialsExists] Error:', error);
     return false;
   }
 };
@@ -119,18 +119,18 @@ export default {
 
       // Solo calcular si billingInitials está vacío y tenemos marca y modelo
       if (!data.billingInitials?.trim() && data.brand?.trim() && data.model?.trim()) {
-        console.log('[beforeCreate] Generando siglas para:', data.brand, data.model);
-        
+        strapi.log.info('[beforeCreate] Generando siglas para:', data.brand, data.model);
+
         const initials = await findUniqueInitials(strapi, data.brand, data.model);
-        
+
         if (initials) {
           data.billingInitials = initials;
-          console.log('[beforeCreate] Siglas generadas:', initials);
+          strapi.log.info('[beforeCreate] Siglas generadas:', initials);
         }
       }
     } catch (error) {
       // Loggear error pero no bloquear la creación del vehículo
-      console.error('[beforeCreate] Error generando siglas:', error);
+      strapi.log.error('[beforeCreate] Error generando siglas:', error);
       // No lanzar el error para evitar que falle la creación del vehículo
     }
   },
@@ -140,12 +140,11 @@ export default {
       const { data, where } = event.params;
 
       // Si se está actualizando marca o modelo, y no viene billingInitials explícito
-      const shouldRecalculate = 
-        (data.brand !== undefined || data.model !== undefined) && 
-        !data.billingInitials?.trim();
+      const shouldRecalculate =
+        (data.brand !== undefined || data.model !== undefined) && !data.billingInitials?.trim();
 
       if (shouldRecalculate) {
-        console.log('[beforeUpdate] Recalculando siglas...');
+        strapi.log.info('[beforeUpdate] Recalculando siglas...');
 
         // Obtener el documentId para excluir el registro actual
         let documentId = where?.documentId;
@@ -167,22 +166,22 @@ export default {
               currentModel = currentModel ?? existing.model;
             }
           } catch (lookupError) {
-            console.error('[beforeUpdate] Error buscando vehículo existente:', lookupError);
+            strapi.log.error('[beforeUpdate] Error buscando vehículo existente:', lookupError);
           }
         }
 
         if (currentBrand?.trim() && currentModel?.trim()) {
           const initials = await findUniqueInitials(strapi, currentBrand, currentModel, documentId);
-          
+
           if (initials) {
             data.billingInitials = initials;
-            console.log('[beforeUpdate] Siglas recalculadas:', initials);
+            strapi.log.info('[beforeUpdate] Siglas recalculadas:', initials);
           }
         }
       }
     } catch (error) {
       // Loggear error pero no bloquear la actualización del vehículo
-      console.error('[beforeUpdate] Error recalculando siglas:', error);
+      strapi.log.error('[beforeUpdate] Error recalculando siglas:', error);
       // No lanzar el error para evitar que falle la actualización del vehículo
     }
   },
