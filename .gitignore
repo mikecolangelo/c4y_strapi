@@ -126,13 +126,17 @@ license.txt
 exports
 .strapi
 dist
+dist.old
+dist.old.admin
 build
 .strapi-updater.json
+.strapi-updater*
 .strapi-cloud.json
 
 # Backups and scripts
 *.bak
 *.bak.*
+*.err
 *-debug.js
 *-fix.js
 fix-*.js
