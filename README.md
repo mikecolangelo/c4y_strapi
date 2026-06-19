@@ -1,61 +1,91 @@
-# 🚀 Getting started with Strapi
+# Car4You — Backend
 
-Strapi comes with a full featured [Command Line Interface](https://docs.strapi.io/dev-docs/cli) (CLI) which lets you scaffold and manage your project in seconds.
+Headless CMS / API for Car4You, built with **Strapi 5.33.3** (TypeScript) on
+**PostgreSQL**.
 
-### `develop`
+## Tech stack
 
-Start your Strapi application with autoReload enabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-develop)
+- **Strapi 5.33.3** (TypeScript, CommonJS)
+- **PostgreSQL** (database `main_car4youpanama`)
+- **pino** logging via `strapi.log`
+- **Vitest** for unit tests
+- **pnpm** as the package manager
 
+## Prerequisites
+
+- Node.js `>=20 <=24`
+- pnpm `10.x`
+- A reachable PostgreSQL instance
+
+## Environment
+
+Create a `.env` from `.env.example` and fill in the secrets and database
+connection. Strapi will not boot without the auth/session secrets:
+
+```bash
+HOST=0.0.0.0
+PORT=1337
+APP_KEYS=...
+API_TOKEN_SALT=...
+ADMIN_JWT_SECRET=...        # required by the SessionManager
+TRANSFER_TOKEN_SALT=...
+JWT_SECRET=...
+ENCRYPTION_KEY=...
+DATABASE_CLIENT=postgres
+DATABASE_HOST=127.0.0.1
+DATABASE_PORT=5432
+DATABASE_NAME=main_car4youpanama
+DATABASE_USERNAME=...
+DATABASE_PASSWORD=...
 ```
-npm run develop
-# or
-yarn develop
+
+> If you see `Missing admin.auth.secret configuration`, your `.env` is missing
+> `ADMIN_JWT_SECRET`.
+
+## Getting started
+
+```bash
+pnpm install
+pnpm develop      # http://localhost:1337 (admin at /admin)
 ```
 
-### `start`
+## Available scripts
 
-Start your Strapi application with autoReload disabled. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-start)
+| Script                         | Description                        |
+| ------------------------------ | ---------------------------------- |
+| `pnpm develop`                 | Start Strapi with auto-reload      |
+| `pnpm start`                   | Start Strapi without auto-reload   |
+| `pnpm build`                   | Build the admin panel              |
+| `pnpm lint`                    | Run ESLint over `src/`             |
+| `pnpm format` / `format:check` | Apply / verify Prettier formatting |
+| `pnpm typecheck`               | `tsc --noEmit`                     |
+| `pnpm test`                    | Run the Vitest suite               |
 
-```
-npm run start
-# or
-yarn start
-```
+## Permissions
 
-### `build`
+REST permissions for new content-types are **disabled by default** in Strapi.
+Rather than toggling them by hand in the admin UI, they are granted
+idempotently on bootstrap so they survive a fresh database. See
+`src/extensions/permissions/authenticated-access.ts` and its use in
+`src/index.ts`.
 
-Build your admin panel. [Learn more](https://docs.strapi.io/dev-docs/cli#strapi-build)
+## Code quality & conventions
 
-```
-npm run build
-# or
-yarn build
-```
+- **Prettier** owns formatting; **ESLint** (flat config, typescript-eslint)
+  owns linting.
+- **Husky** runs `lint-staged` on `pre-commit` and **commitlint** on
+  `commit-msg`.
+- Commit messages must follow **Conventional Commits**, e.g.
+  `fix(permissions): grant service catalog access`.
+- `tsconfig` compiles with `removeComments`, so production output ships without
+  comments.
 
-## ⚙️ Deployment
+## Logging
 
-Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
+Use `strapi.log` (pino) instead of `console.*`. It is structured and its level
+is controlled by the environment.
 
-```
-yarn strapi deploy
-```
+## Maintenance
 
-## 📚 Learn more
-
-- [Resource center](https://strapi.io/resource-center) - Strapi resource center.
-- [Strapi documentation](https://docs.strapi.io) - Official Strapi documentation.
-- [Strapi tutorials](https://strapi.io/tutorials) - List of tutorials made by the core team and the community.
-- [Strapi blog](https://strapi.io/blog) - Official Strapi blog containing articles made by the Strapi team and the community.
-- [Changelog](https://strapi.io/changelog) - Find out about the Strapi product updates, new features and general improvements.
-
-Feel free to check out the [Strapi GitHub repository](https://github.com/strapi/strapi). Your feedback and contributions are welcome!
-
-## ✨ Community
-
-- [Discord](https://discord.strapi.io) - Come chat with the Strapi community including the core team.
-- [Forum](https://forum.strapi.io/) - Place to discuss, ask questions and find answers, show your Strapi project and get feedback or just talk with other Community members.
-- [Awesome Strapi](https://github.com/strapi/awesome-strapi) - A curated list of awesome things related to Strapi.
-
----
-
-<sub>🤫 Psst! [Strapi is hiring](https://strapi.io/careers).</sub>
+A propose-only database/content-type cleanup analysis lives in
+[`docs/CLEANUP-REPORT.md`](docs/CLEANUP-REPORT.md).
