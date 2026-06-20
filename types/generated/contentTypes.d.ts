@@ -2163,7 +2163,6 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::user-profile.user-profile'> &
       Schema.Attribute.Private;
     notifications: Schema.Attribute.Relation<'oneToMany', 'api::notification.notification'>;
-    password: Schema.Attribute.Password & Schema.Attribute.Private;
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     registeredVehicles: Schema.Attribute.Relation<'oneToMany', 'api::fleet.fleet'>;
@@ -2271,6 +2270,7 @@ export interface ApiVehicleStateVehicleState extends Struct.CollectionTypeSchema
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::vehicle-state.vehicle-state'> &
       Schema.Attribute.Private;
+    mileage: Schema.Attribute.Integer;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;

@@ -69,11 +69,6 @@
       "default": "light",
       "description": "Preferencia de tema (claro/oscuro) persistida por usuario"
     },
-    "password": {
-      "type": "password",
-      "private": true,
-      "description": "LEGACY - No usar. La contraseña real vive en users-permissions"
-    },
     "billingName": {
       "type": "string"
     },
