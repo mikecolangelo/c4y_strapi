@@ -369,6 +369,81 @@ export default factories.createCoreController('api::fleet.fleet', ({ strapi }) =
     }
   },
 
+  // Elimina una entrada del historial de kilometraje. Si la entrada borrada era
+  // la que fijaba el kilometraje actual del vehículo, se recalcula a partir del
+  // mayor valor restante (efecto "deshacer").
+  async deleteMileageRecord(ctx) {
+    const { documentId, recordId } = ctx.params;
+
+    if (!documentId || !recordId) {
+      return ctx.badRequest('Se requiere el documentId del vehículo y el id del registro');
+    }
+
+    try {
+      const vehicle = await strapi.db.query('api::fleet.fleet').findOne({
+        where: { documentId },
+        select: ['id', 'currentMileage'],
+      });
+
+      if (!vehicle) {
+        return ctx.notFound('Vehículo no encontrado');
+      }
+
+      // El recordId puede llegar como documentId (string) o como id numérico
+      const numericId = Number(recordId);
+      const entry = await strapi.db
+        .query('api::fleet-mileage-history.fleet-mileage-history')
+        .findOne({
+          where: Number.isNaN(numericId) ? { documentId: recordId } : { id: numericId },
+          populate: { vehicle: { select: ['id'] } },
+        });
+
+      if (!entry) {
+        return ctx.notFound('Registro de kilometraje no encontrado');
+      }
+
+      if (!entry.vehicle || entry.vehicle.id !== vehicle.id) {
+        return ctx.badRequest('El registro no pertenece a este vehículo');
+      }
+
+      const deletedNew = parseInt(entry.newMileage || 0, 10);
+
+      await strapi.entityService.delete(
+        'api::fleet-mileage-history.fleet-mileage-history',
+        entry.id
+      );
+
+      // Si borramos la entrada que estableció el kilometraje actual, recalcular
+      const vehicleCurrent = parseInt(vehicle.currentMileage || 0, 10);
+      if (deletedNew === vehicleCurrent) {
+        const remaining = await strapi.entityService.findMany(
+          'api::fleet-mileage-history.fleet-mileage-history',
+          {
+            filters: { vehicle: { id: { $eq: vehicle.id } } },
+            sort: { newMileage: 'desc' },
+            limit: 1,
+          }
+        );
+
+        const newCurrent =
+          remaining && remaining.length > 0
+            ? parseInt((remaining[0] as any).newMileage || 0, 10)
+            : parseInt(entry.previousMileage || 0, 10);
+
+        await strapi.entityService.update('api::fleet.fleet', vehicle.id, {
+          data: { currentMileage: newCurrent },
+        });
+
+        return ctx.send({ data: { id: entry.id, deleted: true, currentMileage: newCurrent } });
+      }
+
+      return ctx.send({ data: { id: entry.id, deleted: true, currentMileage: vehicleCurrent } });
+    } catch (error) {
+      strapi.log.error('Error eliminando registro de kilometraje:', error);
+      return ctx.internalServerError('Error al eliminar el registro de kilometraje');
+    }
+  },
+
   async checkMileageReminders(ctx) {
     const { documentId } = ctx.params;
 

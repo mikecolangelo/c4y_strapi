@@ -37,6 +37,15 @@ export const USER_PROFILE_ACTIONS = [
   'api::user-profile.user-profile.update',
 ] as const;
 
+/** CRUD REST actions the panel needs for the Fleet (vehicles) content-type. */
+export const FLEET_ACTIONS = [
+  'api::fleet.fleet.find',
+  'api::fleet.fleet.findOne',
+  'api::fleet.fleet.create',
+  'api::fleet.fleet.update',
+  'api::fleet.fleet.delete',
+] as const;
+
 /** Custom role-permission endpoints consumed by the sidebar/middleware. */
 export const ROLE_PERMISSION_ACTIONS = [
   'api::role-permission.role-permission.mine',
