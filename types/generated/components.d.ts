@@ -7,9 +7,7 @@ export interface ComponentLink extends Struct.ComponentSchema {
     icon: 'link';
   };
   attributes: {
-    href: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'#'>;
+    href: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.DefaultTo<'#'>;
     isExternal: Schema.Attribute.Boolean & Schema.Attribute.Required;
     label: Schema.Attribute.String & Schema.Attribute.Required;
   };
@@ -35,10 +33,8 @@ export interface LayoutHeroSection extends Struct.ComponentSchema {
   };
   attributes: {
     heading: Schema.Attribute.String & Schema.Attribute.Required;
-    image: Schema.Attribute.Media<'images' | 'files'> &
-      Schema.Attribute.Required;
-    link: Schema.Attribute.Component<'component.link', false> &
-      Schema.Attribute.Required;
+    image: Schema.Attribute.Media<'images' | 'files'> & Schema.Attribute.Required;
+    link: Schema.Attribute.Component<'component.link', false> & Schema.Attribute.Required;
     sub_heading: Schema.Attribute.Text & Schema.Attribute.Required;
   };
 }
@@ -55,8 +51,7 @@ export interface LayoutSinginForm extends Struct.ComponentSchema {
     password_label: Schema.Attribute.String & Schema.Attribute.Required;
     password_placeholder: Schema.Attribute.String & Schema.Attribute.Required;
     singup_link: Schema.Attribute.Component<'component.link', true>;
-    singup_previous_link_text: Schema.Attribute.String &
-      Schema.Attribute.Required;
+    singup_previous_link_text: Schema.Attribute.String & Schema.Attribute.Required;
     submit_button: Schema.Attribute.String & Schema.Attribute.Required;
   };
 }
@@ -72,14 +67,11 @@ export interface LayoutSingupForm extends Struct.ComponentSchema {
     email_placeholder: Schema.Attribute.String & Schema.Attribute.Required;
     fullname_label: Schema.Attribute.String & Schema.Attribute.Required;
     fullname_placeholder: Schema.Attribute.String & Schema.Attribute.Required;
-    header: Schema.Attribute.Component<'layout.header-section', false> &
-      Schema.Attribute.Required;
+    header: Schema.Attribute.Component<'layout.header-section', false> & Schema.Attribute.Required;
     password_label: Schema.Attribute.String & Schema.Attribute.Required;
     password_placeholder: Schema.Attribute.String & Schema.Attribute.Required;
-    singin_link: Schema.Attribute.Component<'component.link', true> &
-      Schema.Attribute.Required;
-    singin_previous_link_text: Schema.Attribute.String &
-      Schema.Attribute.Required;
+    singin_link: Schema.Attribute.Component<'component.link', true> & Schema.Attribute.Required;
+    singin_previous_link_text: Schema.Attribute.String & Schema.Attribute.Required;
     submit_buton: Schema.Attribute.String & Schema.Attribute.Required;
     username_label: Schema.Attribute.String & Schema.Attribute.Required;
     username_placeholder: Schema.Attribute.String & Schema.Attribute.Required;
