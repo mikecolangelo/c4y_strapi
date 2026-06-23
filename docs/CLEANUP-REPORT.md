@@ -143,3 +143,33 @@ and 3) once confirmed they are not pending edits.
 
 Nothing in this list should be deleted directly against production without the
 above.
+
+---
+
+## 8. CONTACTOS field usage review (user_profiles)
+
+Cross-checked every descriptive `user_profiles` attribute against the frontend
+(`frontend/app/users/**`, `frontend/app/profile/**`, `frontend/lib/**`,
+`frontend/components/ui/billing/**`) and the backend (`backend/src/**`).
+**No field is fully unused** — all are at minimum read by the API field-selection
+in `frontend/app/api/user-profiles/[id]/route.ts` and rendered/edited somewhere.
+The list below is **propose-only**; do NOT remove any field without owner
+approval (schema deletions drop columns = destructive).
+
+### Candidates to review (partial / weak usage)
+
+| Field                                                              | Status                                                                                                                                                                                                                          | Evidence                                                                                                                                                                                      |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `specialties`                                                      | **Partial-orphan in main editor.** Loaded into state on the user-detail page but has NO form input and NO render block there. Still actively edited via `components/ui/billing/quick-user-create.tsx` and the lead-import flow. | `users/details/[id]/page.tsx` only has the type decl + `data.specialties` load (lines 161/265/361), no `value={formData.specialties}`. Used in `quick-user-create.tsx`, `lib/lead-import.ts`. |
+| `billingName` / `billingAddress` / `billingTaxId` / `billingPhone` | **Used but narrow.** Fully wired in the user-detail billing card (form + render) and consumed by `lib/billing.ts` for invoice/financing client data. Keep — they back the billing module.                                       | `users/details/[id]/page.tsx` form+render; `lib/billing.ts` field selections.                                                                                                                 |
+| `linkedin`                                                         | Used (form + render on detail page). Low business value but not dead.                                                                                                                                                           | `users/details/[id]/page.tsx` 1033/1732.                                                                                                                                                      |
+| `workSchedule`                                                     | Used (form + render).                                                                                                                                                                                                           | `users/details/[id]/page.tsx` 934/1645.                                                                                                                                                       |
+| `themePreference`                                                  | Actively used (theme persistence). Keep.                                                                                                                                                                                        | `app/api/user-profile/theme/route.ts`, `lib/theme-provider.tsx`.                                                                                                                              |
+
+### Recommendation
+
+- **No deletions.** The only true anomaly is `specialties` being read-but-not-editable
+  on the main user-detail page. Recommended fix is additive/UI, not a schema drop:
+  either surface `specialties` in the detail-page form (parity with
+  quick-user-create) OR intentionally leave it import-only. Decide with the owner.
+- All `billing*` fields are load-bearing for the billing/invoicing module — keep.
