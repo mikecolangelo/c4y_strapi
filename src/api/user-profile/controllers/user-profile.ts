@@ -3,6 +3,7 @@
  */
 
 import { factories } from '@strapi/strapi';
+import { computeDeletionImpact } from '../deletion-impact';
 
 export default factories.createCoreController('api::user-profile.user-profile', ({ strapi }) => ({
   /**
@@ -406,6 +407,36 @@ export default factories.createCoreController('api::user-profile.user-profile', 
     } catch (error: any) {
       strapi.log.error('Error en batchImport de leads:', error);
       return ctx.internalServerError(error.message || 'Error durante la importacion masiva');
+    }
+  },
+
+  /**
+   * READ-ONLY deletion impact preview for one or more contacts.
+   *
+   * Accepts { ids: string[] } (profile documentIds, same ids the frontend
+   * batch-delete sends to DELETE /api/user-profiles/:id) and COUNTS — never
+   * deletes — the contacts, their linked userAccounts, and every related
+   * record so the UI can warn before a bulk delete is confirmed.
+   */
+  async deletionImpact(ctx) {
+    const user = ctx.state.user;
+    if (!user) {
+      return ctx.unauthorized('Authentication required');
+    }
+
+    const { ids } = ctx.request.body || {};
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return ctx.badRequest("Se requiere un array de documentIds en 'ids'");
+    }
+
+    try {
+      const impact = await computeDeletionImpact(strapi, ids);
+      return ctx.send(impact);
+    } catch (error: any) {
+      strapi.log.error('Error calculando impacto de eliminacion de contactos:', error);
+      return ctx.internalServerError(
+        error.message || 'Error al calcular el impacto de eliminacion'
+      );
     }
   },
 }));

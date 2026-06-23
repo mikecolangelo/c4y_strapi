@@ -47,5 +47,14 @@ export default {
         middlewares: [],
       },
     },
+    {
+      method: 'POST',
+      path: '/user-profiles/deletion-impact',
+      handler: 'api::user-profile.user-profile.deletionImpact',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
   ],
 } as Core.Router;
