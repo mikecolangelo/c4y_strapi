@@ -21,6 +21,9 @@
       "type": "integer",
       "required": true,
       "default": 0
+    },
+    "hiddenForRoles": {
+      "type": "json"
     }
   }
 }

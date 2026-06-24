@@ -12,18 +12,18 @@ const UID = 'api::menu-config.menu-config';
 const service = (strapi: any) => strapi.service(UID);
 
 export default factories.createCoreController(UID, ({ strapi }) => ({
-  /** Devuelve el orden actual del menú: { order: string[] }. */
+  /** Devuelve el layout del menú: { order: string[], hidden: { moduleKey: roles[] } }. */
   async order(ctx) {
     try {
-      const order = await service(strapi).getOrder();
-      return ctx.send({ data: { order } });
+      const layout = await service(strapi).getLayout();
+      return ctx.send({ data: layout });
     } catch (error: any) {
-      strapi.log.error('Error obteniendo el orden del menú:', error);
-      return ctx.internalServerError('Error al obtener el orden del menú');
+      strapi.log.error('Error obteniendo el menú:', error);
+      return ctx.internalServerError('Error al obtener el menú');
     }
   },
 
-  /** Guarda un nuevo orden. Solo admin (o API token de servidor). */
+  /** Guarda orden + visibilidad. Solo admin (o API token de servidor). */
   async updateOrder(ctx) {
     const user = ctx.state.user;
     if (user?.email) {
@@ -32,21 +32,21 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
         select: ['role'],
       });
       if (profile?.role !== 'admin') {
-        return ctx.forbidden('Solo los administradores pueden reordenar el menú');
+        return ctx.forbidden('Solo los administradores pueden configurar el menú');
       }
     }
 
-    const { order } = ctx.request.body || {};
+    const { order, hidden } = ctx.request.body || {};
     if (!Array.isArray(order)) {
       return ctx.badRequest("Se requiere el arreglo 'order' de moduleKeys");
     }
 
     try {
-      const updated = await service(strapi).updateOrder(order);
-      return ctx.send({ data: { order: updated } });
+      const updated = await service(strapi).updateLayout(order, hidden);
+      return ctx.send({ data: updated });
     } catch (error: any) {
-      strapi.log.error('Error actualizando el orden del menú:', error);
-      return ctx.badRequest(error.message || 'Error al actualizar el orden del menú');
+      strapi.log.error('Error actualizando el menú:', error);
+      return ctx.badRequest(error.message || 'Error al actualizar el menú');
     }
   },
 }));
