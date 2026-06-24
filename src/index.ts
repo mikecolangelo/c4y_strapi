@@ -7,6 +7,7 @@ import {
   ensureAuthenticatedPermissions,
   FLEET_ACTIONS,
   MENU_CONFIG_ACTIONS,
+  NOTIFICATION_STREAM_ACTIONS,
   ROLE_ACTIONS,
   ROLE_PERMISSION_ACTIONS,
   SERVICE_CATALOG_ACTIONS,
@@ -120,5 +121,12 @@ export default {
     await ensureAuthenticatedPermissions(strapi, USER_COMMENT_ACTIONS, 'user-comment');
     await ensureAuthenticatedPermissions(strapi, USER_PROFILE_ACTIONS, 'user-profile');
     await ensureAuthenticatedPermissions(strapi, FLEET_ACTIONS, 'fleet');
+
+    // Grant the real-time notifications SSE stream to Authenticated users.
+    await ensureAuthenticatedPermissions(
+      strapi,
+      NOTIFICATION_STREAM_ACTIONS,
+      'notification-stream'
+    );
   },
 };

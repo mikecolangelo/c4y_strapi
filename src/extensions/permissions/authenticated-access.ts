@@ -69,6 +69,14 @@ export const MENU_CONFIG_ACTIONS = [
 ] as const;
 
 /**
+ * Custom real-time notifications endpoint: the SSE stream that pushes
+ * notification changes to connected clients in place of polling.
+ */
+export const NOTIFICATION_STREAM_ACTIONS = [
+  'api::notification.notification-stream.stream',
+] as const;
+
+/**
  * Idempotently grants the given users-permissions `actions` to the
  * "Authenticated" role. Only missing permissions are created, so it is safe to
  * run on every bootstrap.
