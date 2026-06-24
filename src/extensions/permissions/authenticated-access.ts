@@ -54,6 +54,14 @@ export const ROLE_PERMISSION_ACTIONS = [
   'api::role-permission.role-permission.updateMatrix',
 ] as const;
 
+/** Custom role-management endpoints: list (read), create/update/delete (admin). */
+export const ROLE_ACTIONS = [
+  'api::role.role.list',
+  'api::role.role.createRole',
+  'api::role.role.updateRole',
+  'api::role.role.deleteRole',
+] as const;
+
 /** Custom menu-config endpoints: read the menu order, and reorder it (admin). */
 export const MENU_CONFIG_ACTIONS = [
   'api::menu-config.menu-config.order',

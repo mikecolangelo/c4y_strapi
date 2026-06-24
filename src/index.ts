@@ -7,6 +7,7 @@ import {
   ensureAuthenticatedPermissions,
   FLEET_ACTIONS,
   MENU_CONFIG_ACTIONS,
+  ROLE_ACTIONS,
   ROLE_PERMISSION_ACTIONS,
   SERVICE_CATALOG_ACTIONS,
   USER_COMMENT_ACTIONS,
@@ -103,12 +104,17 @@ export default {
     // Seed new isolated vehicle document categories
     await seedVehicleDocumentCategories(strapi);
 
+    // Seed de roles base (admin/driver/lead) como roles del sistema (idempotente).
+    // Debe correr ANTES del seed de permisos para que getRoleKeys los incluya.
+    await strapi.service('api::role.role').seedBaseRoles();
+
     // Seed de permisos por rol y módulo (idempotente)
     await strapi.service('api::role-permission.role-permission').seedDefaults();
 
     // Grant the Authenticated role access to the custom role-permission and
     // service catalog endpoints (Strapi disables new content-types by default).
     await ensureAuthenticatedPermissions(strapi, ROLE_PERMISSION_ACTIONS, 'role-permission');
+    await ensureAuthenticatedPermissions(strapi, ROLE_ACTIONS, 'role');
     await ensureAuthenticatedPermissions(strapi, MENU_CONFIG_ACTIONS, 'menu-config');
     await ensureAuthenticatedPermissions(strapi, SERVICE_CATALOG_ACTIONS, 'service');
     await ensureAuthenticatedPermissions(strapi, USER_COMMENT_ACTIONS, 'user-comment');

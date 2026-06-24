@@ -7,7 +7,7 @@
  */
 
 import { factories } from '@strapi/strapi';
-import { MODULE_KEYS, ROLES } from '../../../config/permission-modules';
+import { MODULE_KEYS } from '../../../config/permission-modules';
 import {
   resolveMenuOrder,
   buildOrderRows,
@@ -17,6 +17,7 @@ import {
 } from '../order-utils';
 
 const UID = 'api::menu-config.menu-config';
+const ROLE_UID = 'api::role.role';
 
 export interface MenuLayout {
   /** moduleKeys en el orden guardado. */
@@ -34,10 +35,13 @@ export default factories.createCoreService(UID, ({ strapi }) => ({
 
   /** Layout completo: orden + roles ocultos por módulo. */
   async getLayout(): Promise<MenuLayout> {
-    const rows = await strapi.db.query(UID).findMany({});
+    const [rows, roles] = await Promise.all([
+      strapi.db.query(UID).findMany({}),
+      strapi.service(ROLE_UID).getRoleKeys() as Promise<string[]>,
+    ]);
     return {
       order: resolveMenuOrder(rows, MODULE_KEYS),
-      hidden: resolveHidden(rows, MODULE_KEYS, [...ROLES]),
+      hidden: resolveHidden(rows, MODULE_KEYS, roles),
     };
   },
 
@@ -47,8 +51,9 @@ export default factories.createCoreService(UID, ({ strapi }) => ({
    * ya no existen.
    */
   async updateLayout(orderedKeys: string[], hiddenInput: unknown): Promise<MenuLayout> {
+    const roles: string[] = await strapi.service(ROLE_UID).getRoleKeys();
     const rows = buildOrderRows(orderedKeys, MODULE_KEYS);
-    const hidden = sanitizeHidden(hiddenInput, MODULE_KEYS, [...ROLES]);
+    const hidden = sanitizeHidden(hiddenInput, MODULE_KEYS, roles);
 
     for (const { moduleKey, sortIndex } of rows) {
       const data = { sortIndex, hiddenForRoles: hidden[moduleKey] ?? [] };

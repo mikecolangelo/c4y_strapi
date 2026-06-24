@@ -11,17 +11,24 @@ import {
   DEFAULT_MATRIX,
   MODULE_KEYS,
   MODULES,
-  ROLES,
   type ModulePermission,
   type PermissionAction,
-  type PermissionRole,
 } from '../../../config/permission-modules';
 
 const UID = 'api::role-permission.role-permission';
+const ROLE_UID = 'api::role.role';
 
 type FullMatrix = Record<string, Record<string, ModulePermission>>;
 
 let cache: FullMatrix | null = null;
+
+const NONE: ModulePermission = {
+  canAccess: false,
+  canRead: false,
+  canCreate: false,
+  canUpdate: false,
+  canDelete: false,
+};
 
 const rowToPermission = (row: any): ModulePermission => ({
   canAccess: !!row.canAccess,
@@ -31,27 +38,29 @@ const rowToPermission = (row: any): ModulePermission => ({
   canDelete: !!row.canDelete,
 });
 
+/**
+ * Default permission set for a role+module. Base roles use DEFAULT_MATRIX; any
+ * custom role defaults to no access (all-false).
+ */
+const defaultPermissionFor = (role: string, moduleKey: string): ModulePermission =>
+  DEFAULT_MATRIX[role as keyof typeof DEFAULT_MATRIX]?.[moduleKey] ?? NONE;
+
 export default factories.createCoreService(UID, ({ strapi }) => ({
   /**
    * Garantiza que exista una fila por cada combinación rol+módulo.
    * Idempotente: solo crea las que faltan, respeta la matriz por defecto.
    */
   async seedDefaults() {
+    const roles = await strapi.service(ROLE_UID).getRoleKeys();
     const existing = await strapi.db.query(UID).findMany({});
     const existingKeys = new Set(existing.map((r: any) => `${r.role}::${r.moduleKey}`));
 
     let created = 0;
-    for (const role of ROLES) {
+    for (const role of roles) {
       for (const moduleKey of MODULE_KEYS) {
         const key = `${role}::${moduleKey}`;
         if (existingKeys.has(key)) continue;
-        const perm = DEFAULT_MATRIX[role][moduleKey] ?? {
-          canAccess: false,
-          canRead: false,
-          canCreate: false,
-          canUpdate: false,
-          canDelete: false,
-        };
+        const perm = defaultPermissionFor(role, moduleKey);
         await strapi.db.query(UID).create({
           data: { role, moduleKey, ...perm },
         });
@@ -70,26 +79,21 @@ export default factories.createCoreService(UID, ({ strapi }) => ({
   async getMatrix(): Promise<FullMatrix> {
     if (cache) return cache;
 
+    const roles: string[] = await strapi.service(ROLE_UID).getRoleKeys();
     const rows = await strapi.db.query(UID).findMany({});
     const matrix: FullMatrix = {};
-    for (const role of ROLES) matrix[role] = {};
+    for (const role of roles) matrix[role] = {};
 
     for (const row of rows) {
       if (!matrix[row.role]) matrix[row.role] = {};
       matrix[row.role][row.moduleKey] = rowToPermission(row);
     }
 
-    // Rellenar huecos con la matriz por defecto para robustez.
-    for (const role of ROLES) {
+    // Rellenar huecos con la matriz por defecto para robustez (custom roles -> none).
+    for (const role of roles) {
       for (const moduleKey of MODULE_KEYS) {
         if (!matrix[role][moduleKey]) {
-          matrix[role][moduleKey] = DEFAULT_MATRIX[role][moduleKey] ?? {
-            canAccess: false,
-            canRead: false,
-            canCreate: false,
-            canUpdate: false,
-            canDelete: false,
-          };
+          matrix[role][moduleKey] = defaultPermissionFor(role, moduleKey);
         }
       }
     }
@@ -118,8 +122,9 @@ export default factories.createCoreService(UID, ({ strapi }) => ({
    * `payload` = { admin: { users: {canAccess,...}, ... }, driver: {...} }
    */
   async updateMatrix(payload: Record<string, Record<string, Partial<ModulePermission>>>) {
+    const roles = new Set<string>(await strapi.service(ROLE_UID).getRoleKeys());
     for (const role of Object.keys(payload)) {
-      if (!ROLES.includes(role as PermissionRole)) continue;
+      if (!roles.has(role)) continue;
       for (const moduleKey of Object.keys(payload[role])) {
         if (!MODULE_KEYS.includes(moduleKey)) continue;
         const incoming = payload[role][moduleKey] || {};
