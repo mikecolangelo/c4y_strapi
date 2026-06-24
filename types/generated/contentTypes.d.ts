@@ -1835,6 +1835,38 @@ export interface ApiRolePermissionRolePermission extends Struct.CollectionTypeSc
   };
 }
 
+export interface ApiRoleRole extends Struct.CollectionTypeSchema {
+  collectionName: 'roles_custom';
+  info: {
+    description: 'Roles del sistema (base y personalizados). La matriz de permisos vive en role-permission.';
+    displayName: 'Role';
+    pluralName: 'roles';
+    singularName: 'role';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    color: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    isActive: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<true>;
+    isSystem: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    key: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique;
+    label: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::role.role'> &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+  };
+}
+
 export interface ApiServiceNoteServiceNote extends Struct.CollectionTypeSchema {
   collectionName: 'service_notes';
   info: {
@@ -2814,6 +2846,7 @@ declare module '@strapi/strapi' {
       'api::payment-application.payment-application': ApiPaymentApplicationPaymentApplication;
       'api::penalty-debt.penalty-debt': ApiPenaltyDebtPenaltyDebt;
       'api::role-permission.role-permission': ApiRolePermissionRolePermission;
+      'api::role.role': ApiRoleRole;
       'api::service-note.service-note': ApiServiceNoteServiceNote;
       'api::service-order-inventory-item.service-order-inventory-item': ApiServiceOrderInventoryItemServiceOrderInventoryItem;
       'api::service-order.service-order': ApiServiceOrderServiceOrder;

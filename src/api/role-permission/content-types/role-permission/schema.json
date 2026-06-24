@@ -13,8 +13,7 @@
   "pluginOptions": {},
   "attributes": {
     "role": {
-      "type": "enumeration",
-      "enum": ["admin", "driver", "lead"],
+      "type": "string",
       "required": true
     },
     "moduleKey": {
