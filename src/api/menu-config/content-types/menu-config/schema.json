@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "menu_configs",
+  "info": {
+    "singularName": "menu-config",
+    "pluralName": "menu-configs",
+    "displayName": "Menu Config",
+    "description": "Orden de los items del menú (editable desde Configuración). La visibilidad por rol vive en role-permission.canAccess."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "moduleKey": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "sortIndex": {
+      "type": "integer",
+      "required": true,
+      "default": 0
+    }
+  }
+}

@@ -1566,6 +1566,31 @@ export interface ApiMaintenanceKitMaintenanceKit extends Struct.CollectionTypeSc
   };
 }
 
+export interface ApiMenuConfigMenuConfig extends Struct.CollectionTypeSchema {
+  collectionName: 'menu_configs';
+  info: {
+    description: 'Orden de los items del men\u00FA (editable desde Configuraci\u00F3n). La visibilidad por rol vive en role-permission.canAccess.';
+    displayName: 'Menu Config';
+    pluralName: 'menu-configs';
+    singularName: 'menu-config';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::menu-config.menu-config'> &
+      Schema.Attribute.Private;
+    moduleKey: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique;
+    publishedAt: Schema.Attribute.DateTime;
+    sortIndex: Schema.Attribute.Integer & Schema.Attribute.Required & Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+  };
+}
+
 export interface ApiNotificationNotification extends Struct.CollectionTypeSchema {
   collectionName: 'notifications';
   info: {
@@ -2783,6 +2808,7 @@ declare module '@strapi/strapi' {
       'api::invoice.invoice': ApiInvoiceInvoice;
       'api::maintenance-kit-item.maintenance-kit-item': ApiMaintenanceKitItemMaintenanceKitItem;
       'api::maintenance-kit.maintenance-kit': ApiMaintenanceKitMaintenanceKit;
+      'api::menu-config.menu-config': ApiMenuConfigMenuConfig;
       'api::notification.notification': ApiNotificationNotification;
       'api::payment-application.payment-application': ApiPaymentApplicationPaymentApplication;
       'api::penalty-debt.penalty-debt': ApiPenaltyDebtPenaltyDebt;

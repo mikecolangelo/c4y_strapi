@@ -54,6 +54,12 @@ export const ROLE_PERMISSION_ACTIONS = [
   'api::role-permission.role-permission.updateMatrix',
 ] as const;
 
+/** Custom menu-config endpoints: read the menu order, and reorder it (admin). */
+export const MENU_CONFIG_ACTIONS = [
+  'api::menu-config.menu-config.order',
+  'api::menu-config.menu-config.updateOrder',
+] as const;
+
 /**
  * Idempotently grants the given users-permissions `actions` to the
  * "Authenticated" role. Only missing permissions are created, so it is safe to
