@@ -7,7 +7,7 @@
  * pings, and cleans up on disconnect.
  */
 import type { Context } from 'koa';
-import { notificationEventHub, type HubClient } from '../../../../extensions/realtime/event-hub';
+import { notificationEventHub, type HubClient } from '../../../extensions/realtime/event-hub';
 
 /** Interval between keep-alive pings (ms). Keeps proxies from closing idle connections. */
 const KEEP_ALIVE_MS = 25_000;
