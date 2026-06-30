@@ -1829,7 +1829,7 @@ export interface ApiRolePermissionRolePermission extends Struct.CollectionTypeSc
       Schema.Attribute.Private;
     moduleKey: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
-    role: Schema.Attribute.Enumeration<['admin', 'driver', 'lead']> & Schema.Attribute.Required;
+    role: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
   };
@@ -2224,7 +2224,7 @@ export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
     phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     registeredVehicles: Schema.Attribute.Relation<'oneToMany', 'api::fleet.fleet'>;
-    role: Schema.Attribute.Enumeration<['admin', 'driver', 'lead']> & Schema.Attribute.Required;
+    role: Schema.Attribute.String & Schema.Attribute.Required;
     serviceNotes: Schema.Attribute.Relation<'oneToMany', 'api::service-note.service-note'>;
     serviceOrders: Schema.Attribute.Relation<'oneToMany', 'api::service-order.service-order'>;
     specialties: Schema.Attribute.Text;
