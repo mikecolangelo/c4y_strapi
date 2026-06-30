@@ -1,25 +1,85 @@
 import type { Core } from '@strapi/strapi';
 
 const PROFILE_SEEDS = [
-  { displayName: 'Administrador', role: 'admin', email: 'admin@example.com', phone: '+34 600 000 000' },
-  { displayName: 'Conductor Demo', role: 'driver', email: 'driver@example.com', phone: '+34 600 000 222' }
+  {
+    displayName: 'Administrador',
+    role: 'admin',
+    email: 'admin@example.com',
+    phone: '+34 600 000 000',
+  },
+  {
+    displayName: 'Conductor Demo',
+    role: 'driver',
+    email: 'driver@example.com',
+    phone: '+34 600 000 222',
+  },
 ];
 
 const CLIENT_SEEDS = [
-  { fullName: 'Alejandro Gomez', status: 'activo', email: 'alejandro@example.com', phone: '+34 612 345 678' },
-  { fullName: 'Beatriz Fernández', status: 'lead', email: 'beatriz@example.com', phone: '+34 698 765 432' }
+  {
+    fullName: 'Alejandro Gomez',
+    status: 'activo',
+    email: 'alejandro@example.com',
+    phone: '+34 612 345 678',
+  },
+  {
+    fullName: 'Beatriz Fernández',
+    status: 'lead',
+    email: 'beatriz@example.com',
+    phone: '+34 698 765 432',
+  },
 ];
 
 const SERVICE_SEEDS = [
-  { name: 'Cambio de Aceite', coverage: 'cliente', price: 80, durationMinutes: 30, category: 'Mantenimiento' },
-  { name: 'Rotación de Neumáticos', coverage: 'cliente', price: 50, durationMinutes: 45, category: 'Mantenimiento' }
+  {
+    name: 'Cambio de Aceite',
+    coverage: 'cliente',
+    price: 80,
+    durationMinutes: 30,
+    category: 'Mantenimiento',
+  },
+  {
+    name: 'Rotación de Neumáticos',
+    coverage: 'cliente',
+    price: 50,
+    durationMinutes: 45,
+    category: 'Mantenimiento',
+  },
 ];
 
 const INVENTORY_SEEDS = [
-  { code: 'FLTR-001', description: 'Filtro de aceite motor 1.6L', stock: 50, stockStatus: 'high', unit: 'unidades' },
-  { code: 'ACEITE-10W30', description: 'Aceite de motor semisintético 10W-30', stock: 30, stockStatus: 'high', unit: 'litros', salePrice: 12.5, unitCost: 8.0 },
-  { code: 'ESTOPERA-001', description: 'Estopera de cárter universal', stock: 20, stockStatus: 'medium', unit: 'unidades', salePrice: 3.0, unitCost: 1.5 },
-  { code: 'TYR-205-55R16', description: 'Neumático Michelin Primacy 4', stock: 4, stockStatus: 'low', unit: 'unidades' }
+  {
+    code: 'FLTR-001',
+    description: 'Filtro de aceite motor 1.6L',
+    stock: 50,
+    stockStatus: 'high',
+    unit: 'unidades',
+  },
+  {
+    code: 'ACEITE-10W30',
+    description: 'Aceite de motor semisintético 10W-30',
+    stock: 30,
+    stockStatus: 'high',
+    unit: 'litros',
+    salePrice: 12.5,
+    unitCost: 8.0,
+  },
+  {
+    code: 'ESTOPERA-001',
+    description: 'Estopera de cárter universal',
+    stock: 20,
+    stockStatus: 'medium',
+    unit: 'unidades',
+    salePrice: 3.0,
+    unitCost: 1.5,
+  },
+  {
+    code: 'TYR-205-55R16',
+    description: 'Neumático Michelin Primacy 4',
+    stock: 4,
+    stockStatus: 'low',
+    unit: 'unidades',
+  },
 ];
 
 const SUPPLY_ITEM_SEEDS = [
@@ -31,7 +91,7 @@ const SUPPLY_ITEM_SEEDS = [
     minStock: 5,
     description: 'Kit completo de limpieza para vehículos: paños, limpiador, aromatizante',
     isActive: true,
-    icon: 'package'
+    icon: 'package',
   },
   {
     name: 'Gasolina Regular',
@@ -41,7 +101,7 @@ const SUPPLY_ITEM_SEEDS = [
     minStock: 20,
     description: 'Gasolina regular para abastecimiento de vehículos de la flota',
     isActive: true,
-    icon: 'fuel'
+    icon: 'fuel',
   },
   {
     name: 'Aceite de Motor 10W-30',
@@ -51,7 +111,7 @@ const SUPPLY_ITEM_SEEDS = [
     minStock: 10,
     description: 'Aceite semisintético para motor gasolina',
     isActive: true,
-    icon: 'droplet'
+    icon: 'droplet',
   },
   {
     name: 'Kit de Emergencia Vial',
@@ -61,8 +121,8 @@ const SUPPLY_ITEM_SEEDS = [
     minStock: 3,
     description: 'Kit de emergencia: triángulos, chaleco reflectante, linterna',
     isActive: true,
-    icon: 'box'
-  }
+    icon: 'box',
+  },
 ];
 
 const FLEET_SEEDS = [
@@ -78,7 +138,7 @@ const FLEET_SEEDS = [
     mileage: 0,
     fuelType: 'Gasolina',
     transmission: 'Automática',
-    imageAlt: 'Ford Mustang plata 2023'
+    imageAlt: 'Ford Mustang plata 2023',
   },
   {
     name: 'Honda Civic 2021',
@@ -92,7 +152,7 @@ const FLEET_SEEDS = [
     mileage: 35000,
     fuelType: 'Híbrido',
     transmission: 'CVT',
-    imageAlt: 'Honda Civic azul 2021'
+    imageAlt: 'Honda Civic azul 2021',
   },
   {
     name: 'Toyota RAV4 2022',
@@ -106,8 +166,8 @@ const FLEET_SEEDS = [
     mileage: 15000,
     fuelType: 'Híbrido',
     transmission: 'Automática',
-    imageAlt: 'Toyota RAV4 blanca 2022'
-  }
+    imageAlt: 'Toyota RAV4 blanca 2022',
+  },
 ];
 
 export const seedInitialData = async (strapi: Core.Strapi) => {
@@ -130,7 +190,11 @@ export const seedInitialData = async (strapi: Core.Strapi) => {
 /**
  * Helper genérico para configurar múltiples permisos para un rol de manera eficiente
  */
-const configurePermissionsForRole = async (strapi: Core.Strapi, roleType: string, actions: string[]) => {
+const configurePermissionsForRole = async (
+  strapi: Core.Strapi,
+  roleType: string,
+  actions: string[]
+) => {
   try {
     const role = await strapi.db.query('plugin::users-permissions.role').findOne({
       where: { type: roleType },
@@ -142,12 +206,14 @@ const configurePermissionsForRole = async (strapi: Core.Strapi, roleType: string
     }
 
     // Obtener todos los permisos existentes para este rol y estas acciones de una sola vez
-    const existingPermissions = await strapi.db.query('plugin::users-permissions.permission').findMany({
-      where: {
-        role: role.id,
-        action: { $in: actions },
-      },
-    });
+    const existingPermissions = await strapi.db
+      .query('plugin::users-permissions.permission')
+      .findMany({
+        where: {
+          role: role.id,
+          action: { $in: actions },
+        },
+      });
 
     const existingActions = new Set(existingPermissions.map((p: any) => p.action));
 
@@ -178,7 +244,7 @@ const configureUploadPermissions = async (strapi: Core.Strapi) => {
   const actions = [
     'plugin::upload.content-api.upload',
     'plugin::upload.content-api.find',
-    'plugin::upload.content-api.findOne'
+    'plugin::upload.content-api.findOne',
   ];
   await configurePermissionsForRole(strapi, 'authenticated', actions);
 };
@@ -352,7 +418,9 @@ const seedMaintenanceKit = async (strapi: Core.Strapi) => {
       });
     }
 
-    strapi.log.info(`✅ Kit de mantenimiento creado: Kit Cambio de Aceite Completo (${kitItems.length} ítems)`);
+    strapi.log.info(
+      `✅ Kit de mantenimiento creado: Kit Cambio de Aceite Completo (${kitItems.length} ítems)`
+    );
   } catch (error) {
     strapi.log.error('Error creando kit de mantenimiento:', error as Error);
   }
@@ -409,11 +477,14 @@ const seedCollection = async (
     } catch (error: any) {
       // Si el error es de duplicado, lo ignoramos y continuamos
       if (error.message?.includes('unique') || error.message?.includes('duplicate')) {
-        console.log(`[Seed] Entrada duplicada ignorada para ${uid}:`, entry.name || entry.vin || 'unknown');
+        strapi.log.info(
+          `[Seed] Entrada duplicada ignorada para ${uid}:`,
+          entry.name || entry.vin || 'unknown'
+        );
         continue;
       }
       // Para otros errores, solo loggear pero no detener el seed
-      console.error(`[Seed] Error creando entrada en ${uid}:`, error.message);
+      strapi.log.error(`[Seed] Error creando entrada en ${uid}:`, error.message);
     }
   }
 };

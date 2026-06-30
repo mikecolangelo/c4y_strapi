@@ -26,6 +26,11 @@
       "type": "string",
       "required": true
     },
+    "mileage": {
+      "type": "integer",
+      "required": false,
+      "description": "Kilometraje del vehículo al momento de registrar el estado (ancla con el historial de kilometraje)"
+    },
     "vehicle": {
       "type": "relation",
       "relation": "manyToOne",

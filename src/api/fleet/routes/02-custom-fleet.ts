@@ -35,7 +35,16 @@ const customRoutes = [
       middlewares: [],
     },
   },
-
+  {
+    method: 'DELETE',
+    path: '/fleets/:documentId/mileage-history/:recordId',
+    handler: 'api::fleet.fleet.deleteMileageRecord',
+    config: {
+      // auth omitted to require authentication by default in Strapi 5
+      policies: [],
+      middlewares: [],
+    },
+  },
 ];
 
 export default {

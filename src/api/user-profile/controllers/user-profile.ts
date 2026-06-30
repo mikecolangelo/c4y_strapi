@@ -3,6 +3,7 @@
  */
 
 import { factories } from '@strapi/strapi';
+import { computeDeletionImpact } from '../deletion-impact';
 
 export default factories.createCoreController('api::user-profile.user-profile', ({ strapi }) => ({
   /**
@@ -108,7 +109,8 @@ export default factories.createCoreController('api::user-profile.user-profile', 
         return ctx.send({ data: null });
       }
 
-      const userAccountId = typeof profile.userAccount === 'object' ? profile.userAccount.id : profile.userAccount;
+      const userAccountId =
+        typeof profile.userAccount === 'object' ? profile.userAccount.id : profile.userAccount;
       const user = await strapi.db.query('plugin::users-permissions.user').findOne({
         where: { id: userAccountId },
         select: ['id', 'email', 'isValidated', 'validatedAt', 'validationMethod'],
@@ -199,7 +201,8 @@ export default factories.createCoreController('api::user-profile.user-profile', 
         return ctx.badRequest('Este contacto no tiene una cuenta de usuario activa');
       }
 
-      const userAccountId = typeof profile.userAccount === 'object' ? profile.userAccount.id : profile.userAccount;
+      const userAccountId =
+        typeof profile.userAccount === 'object' ? profile.userAccount.id : profile.userAccount;
       const userService = strapi.plugin('users-permissions').service('user');
 
       await userService.edit(userAccountId, {
@@ -242,23 +245,16 @@ export default factories.createCoreController('api::user-profile.user-profile', 
       // Pre-cargar emails y telefonos existentes para deduplicacion eficiente
       const existingProfiles = await strapi.db.query('api::user-profile.user-profile').findMany({
         where: {
-          $or: [
-            { email: { $notNull: true } },
-            { phone: { $notNull: true } },
-          ],
+          $or: [{ email: { $notNull: true } }, { phone: { $notNull: true } }],
         },
         select: ['email', 'phone'],
       });
 
       const existingEmails = new Set(
-        existingProfiles
-          .map((p: any) => p.email?.toLowerCase().trim())
-          .filter(Boolean)
+        existingProfiles.map((p: any) => p.email?.toLowerCase().trim()).filter(Boolean)
       );
       const existingPhones = new Set(
-        existingProfiles
-          .map((p: any) => p.phone?.replace(/\D/g, ''))
-          .filter(Boolean)
+        existingProfiles.map((p: any) => p.phone?.replace(/\D/g, '')).filter(Boolean)
       );
 
       // Tambien trackear duplicados dentro del mismo batch
@@ -335,20 +331,37 @@ export default factories.createCoreController('api::user-profile.user-profile', 
           // Determinar rol: solo admins pueden importar roles distintos a 'lead'
           const requestedRole = row.role ? String(row.role).toLowerCase().trim() : null;
           const allowedRoles = ['admin', 'driver', 'lead'];
-          const effectiveRole = (isAdmin && requestedRole && allowedRoles.includes(requestedRole)
-            ? requestedRole
-            : 'lead') as 'admin' | 'driver' | 'lead';
+          const effectiveRole = (
+            isAdmin && requestedRole && allowedRoles.includes(requestedRole)
+              ? requestedRole
+              : 'lead'
+          ) as 'admin' | 'driver' | 'lead';
 
-          // Crear el lead
+          // Crear el lead. Se persisten todos los campos de contacto que el
+          // import pueda traer (paridad con el modal "Crear Contacto"); los
+          // ausentes quedan en undefined y Strapi los ignora.
+          const trimOrUndefined = (value: unknown) =>
+            value !== null && value !== undefined && String(value).trim() !== ''
+              ? String(value).trim()
+              : undefined;
+
           const payload = {
             displayName: row.displayName.trim(),
             role: effectiveRole,
             email: normalizedEmail || undefined,
             phone: row.phone ? row.phone.trim() : undefined,
-            department: row.department ? String(row.department).trim() : undefined,
-            bio: row.bio ? String(row.bio).trim() : undefined,
+            department: trimOrUndefined(row.department),
+            bio: trimOrUndefined(row.bio),
             hireDate: row.hireDate || undefined,
-            workSchedule: row.workSchedule ? String(row.workSchedule).trim() : undefined,
+            workSchedule: trimOrUndefined(row.workSchedule),
+            identificationNumber: trimOrUndefined(row.identificationNumber),
+            address: trimOrUndefined(row.address),
+            dateOfBirth: row.dateOfBirth || undefined,
+            specialties: trimOrUndefined(row.specialties),
+            emergencyContactName: trimOrUndefined(row.emergencyContactName),
+            emergencyContactPhone: trimOrUndefined(row.emergencyContactPhone),
+            linkedin: trimOrUndefined(row.linkedin),
+            driverLicense: trimOrUndefined(row.driverLicense),
           };
 
           await strapi.entityService.create('api::user-profile.user-profile', {
@@ -394,6 +407,36 @@ export default factories.createCoreController('api::user-profile.user-profile', 
     } catch (error: any) {
       strapi.log.error('Error en batchImport de leads:', error);
       return ctx.internalServerError(error.message || 'Error durante la importacion masiva');
+    }
+  },
+
+  /**
+   * READ-ONLY deletion impact preview for one or more contacts.
+   *
+   * Accepts { ids: string[] } (profile documentIds, same ids the frontend
+   * batch-delete sends to DELETE /api/user-profiles/:id) and COUNTS — never
+   * deletes — the contacts, their linked userAccounts, and every related
+   * record so the UI can warn before a bulk delete is confirmed.
+   */
+  async deletionImpact(ctx) {
+    const user = ctx.state.user;
+    if (!user) {
+      return ctx.unauthorized('Authentication required');
+    }
+
+    const { ids } = ctx.request.body || {};
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return ctx.badRequest("Se requiere un array de documentIds en 'ids'");
+    }
+
+    try {
+      const impact = await computeDeletionImpact(strapi, ids);
+      return ctx.send(impact);
+    } catch (error: any) {
+      strapi.log.error('Error calculando impacto de eliminacion de contactos:', error);
+      return ctx.internalServerError(
+        error.message || 'Error al calcular el impacto de eliminacion'
+      );
     }
   },
 }));
