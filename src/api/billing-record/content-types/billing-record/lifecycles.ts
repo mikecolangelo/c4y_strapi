@@ -1,16 +1,16 @@
 /**
  * Lifecycle hooks for billing-record (Pago Hijo)
- * 
+ *
  * Calcula automáticamente:
  * - daysLate: días de retraso basado en dueDate
  * - lateFeeAmount: multa por retraso (10% diario sobre monto pendiente)
  * - Actualiza el financing padre cuando se crea/modifica un pago
- * 
+ *
  * Valida relaciones padre/hijo:
  * - Evita auto-referencia (un registro no puede ser padre de sí mismo)
  * - Verifica que padre e hijo pertenezcan al mismo financiamiento
  * - Evita ciclos (un padre no puede ser hijo de otro registro)
- * 
+ *
  * Manejo de duplicados:
  * - Si se crea un registro con receiptNumber ya existente que tiene "abonado",
  *   el registro existente se convierte en hijo del nuevo (anidación jerárquica)
@@ -38,13 +38,13 @@ interface BillingRecordData {
  */
 const calculateDaysLate = (dueDate?: string, paymentDate?: string): number => {
   if (!dueDate) return 0;
-  
+
   const due = new Date(dueDate);
   const payment = paymentDate ? new Date(paymentDate) : new Date();
-  
+
   const diffTime = payment.getTime() - due.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return Math.max(0, diffDays);
 };
 
@@ -63,13 +63,13 @@ const calculateLateFee = (
 
 const processPaymentData = (data: BillingRecordData): Partial<BillingRecordData> => {
   const updates: Partial<BillingRecordData> = {};
-  
+
   // Calcular días de retraso si hay fecha de vencimiento
   // Solo calcular si no viene un valor explícito de daysLate
   if (data.dueDate && data.daysLate === undefined) {
     const daysLate = calculateDaysLate(data.dueDate, data.paymentDate);
     updates.daysLate = daysLate;
-    
+
     // Si hay retraso, calcular multa
     // Solo calcular si no viene un valor explícito de lateFeeAmount
     if (daysLate > 0 && data.status === 'retrasado' && data.lateFeeAmount === undefined) {
@@ -79,7 +79,7 @@ const processPaymentData = (data: BillingRecordData): Partial<BillingRecordData>
       updates.lateFeeAmount = 0;
     }
   }
-  
+
   return updates;
 };
 
@@ -101,21 +101,24 @@ const getRecordId = (value: unknown): number | string | null => {
 /**
  * Obtiene el financing ID de un billing record desde la base de datos
  */
-const getRecordFinancingId = async (strapi: any, recordId: number | string): Promise<number | string | null> => {
+const getRecordFinancingId = async (
+  strapi: any,
+  recordId: number | string
+): Promise<number | string | null> => {
   try {
     const record = await strapi.db.query('api::billing-record.billing-record').findOne({
       where: { id: recordId },
       populate: ['financing'],
     });
-    
+
     if (!record) return null;
-    
+
     const financing = record.financing;
     if (!financing) return null;
-    
+
     return financing.documentId || financing.id;
   } catch (error) {
-    console.error('[Lifecycle] Error fetching record financing:', error);
+    strapi.log.error('[Lifecycle] Error fetching record financing:', error);
     return null;
   }
 };
@@ -123,7 +126,11 @@ const getRecordFinancingId = async (strapi: any, recordId: number | string): Pro
 /**
  * Verifica si un registro es descendiente de otro (para evitar ciclos)
  */
-const isDescendant = async (strapi: any, parentId: number | string, childId: number | string): Promise<boolean> => {
+const isDescendant = async (
+  strapi: any,
+  parentId: number | string,
+  childId: number | string
+): Promise<boolean> => {
   try {
     const record = await strapi.db.query('api::billing-record.billing-record').findOne({
       where: { id: childId },
@@ -140,7 +147,7 @@ const isDescendant = async (strapi: any, parentId: number | string, childId: num
     // Si no, seguir buscando hacia arriba
     return await isDescendant(strapi, parentId, recordParentId);
   } catch (error) {
-    console.error('[Lifecycle] Error checking descendant:', error);
+    strapi.log.error('[Lifecycle] Error checking descendant:', error);
     return false;
   }
 };
@@ -167,7 +174,8 @@ const handleDuplicateReceiptNumber = async (
   }
 
   // Solo procesar si el nuevo registro tiene abonado o advanceCredit
-  const newHasAbonado = data.status === 'abonado' || (data.advanceCredit && Number(data.advanceCredit) > 0);
+  const newHasAbonado =
+    data.status === 'abonado' || (data.advanceCredit && Number(data.advanceCredit) > 0);
   if (!newHasAbonado) {
     return { handled: false };
   }
@@ -185,7 +193,9 @@ const handleDuplicateReceiptNumber = async (
     });
 
     if (!existingRecords || existingRecords.length === 0) {
-      console.log(`[handleDuplicate] No se encontró registro existente sin padre para receiptNumber: ${receiptNumber}`);
+      strapi.log.info(
+        `[handleDuplicate] No se encontró registro existente sin padre para receiptNumber: ${receiptNumber}`
+      );
       return { handled: false };
     }
 
@@ -193,7 +203,7 @@ const handleDuplicateReceiptNumber = async (
 
     // Si el registro existente ya tiene coveredBy o ya es hijo, no procesar
     if (existingRecord.coveredBy) {
-      console.log(`[handleDuplicate] El registro existente ya tiene coveredBy, no se procesa`);
+      strapi.log.info(`[handleDuplicate] El registro existente ya tiene coveredBy, no se procesa`);
       return { handled: false };
     }
 
@@ -202,13 +212,17 @@ const handleDuplicateReceiptNumber = async (
       return { handled: false };
     }
 
-    console.log(`[handleDuplicate] Transformando registro existente ID ${existingRecord.id} en hijo del nuevo registro`);
-    console.log(`[handleDuplicate] existingRecord.status: ${existingRecord.status}, amount: ${existingRecord.amount}`);
+    strapi.log.info(
+      `[handleDuplicate] Transformando registro existente ID ${existingRecord.id} en hijo del nuevo registro`
+    );
+    strapi.log.info(
+      `[handleDuplicate] existingRecord.status: ${existingRecord.status}, amount: ${existingRecord.amount}`
+    );
 
     // Obtener el financing del registro existente para encontrar el ID interno
     const existingFinancingId = existingRecord.financing?.id || existingRecord.financing;
     if (!existingFinancingId) {
-      console.log(`[handleDuplicate] El registro existente no tiene financing asociado`);
+      strapi.log.info(`[handleDuplicate] El registro existente no tiene financing asociado`);
       return { handled: false };
     }
 
@@ -242,9 +256,8 @@ const handleDuplicateReceiptNumber = async (
     // y en afterCreate se haga la vinculación real
 
     return { handled: true, parentRecordId: existingRecord.id };
-
   } catch (error) {
-    console.error('[handleDuplicate] Error al procesar duplicado:', error);
+    strapi.log.error('[handleDuplicate] Error al procesar duplicado:', error);
     return { handled: false };
   }
 };
@@ -269,7 +282,9 @@ const linkExistingAsChild = async (
       },
     });
 
-    console.log(`[linkExistingAsChild] Registro ${existingChildId} vinculado como hijo de ${newRecordId}`);
+    strapi.log.info(
+      `[linkExistingAsChild] Registro ${existingChildId} vinculado como hijo de ${newRecordId}`
+    );
 
     // También actualizar el nuevo registro para que quede como pendiente
     // (porque el crédito de abonado no cubre completamente la cuota)
@@ -280,10 +295,11 @@ const linkExistingAsChild = async (
       },
     });
 
-    console.log(`[linkExistingAsChild] Registro ${newRecordId} marcado como pendiente (tenía abonado)`);
-
+    strapi.log.info(
+      `[linkExistingAsChild] Registro ${newRecordId} marcado como pendiente (tenía abonado)`
+    );
   } catch (error) {
-    console.error('[linkExistingAsChild] Error al vincular hijo:', error);
+    strapi.log.error('[linkExistingAsChild] Error al vincular hijo:', error);
   }
 };
 
@@ -299,48 +315,57 @@ const validateParentRecord = async (
   if (!data.parentRecord) {
     return { valid: true };
   }
-  
+
   const parentId = getRecordId(data.parentRecord);
-  
+
   // Si parentRecord es null o connect vacío
   if (parentId === null) {
     return { valid: true };
   }
-  
+
   // 1. Validar auto-referencia
   if (currentRecordId && parentId === currentRecordId) {
     return { valid: false, error: 'Un registro no puede ser padre de sí mismo' };
   }
-  
+
   // 2. Obtener el financing del padre
   const parentFinancingId = await getRecordFinancingId(strapi, parentId);
-  
+
   if (!parentFinancingId) {
-    return { valid: false, error: 'El registro padre no existe o no tiene financiamiento asociado' };
+    return {
+      valid: false,
+      error: 'El registro padre no existe o no tiene financiamiento asociado',
+    };
   }
-  
+
   // 3. Verificar que el hijo pertenezca al mismo financing
   const childFinancingId = getRecordId(data.financing);
-  
+
   if (childFinancingId && String(childFinancingId) !== String(parentFinancingId)) {
-    return { valid: false, error: 'El registro hijo debe pertenecer al mismo financiamiento que el padre' };
+    return {
+      valid: false,
+      error: 'El registro hijo debe pertenecer al mismo financiamiento que el padre',
+    };
   }
-  
+
   // 4. Si estamos actualizando, verificar que no se cree un ciclo
   if (currentRecordId) {
     // Verificar que el padre no sea descendiente del hijo (evitar ciclos)
     const wouldCreateCycle = await isDescendant(strapi, currentRecordId, parentId);
-    
+
     if (wouldCreateCycle) {
       return { valid: false, error: 'No se puede asociar: esto crearía un ciclo en la jerarquía' };
     }
   }
-  
+
   return { valid: true };
 };
 
 export default {
-  async beforeCreate(event: { params: { data: BillingRecordData }; state?: Record<string, unknown> }) {
+  async beforeCreate(event: {
+    params: { data: BillingRecordData };
+    state?: Record<string, unknown>;
+  }) {
     const { data } = event.params;
 
     // Procesar cálculos de días de retraso y multas
@@ -354,7 +379,9 @@ export default {
       // Usamos event.state para pasar información entre beforeCreate y afterCreate
       if (!event.state) event.state = {};
       event.state.pendingChildRecordId = duplicateResult.parentRecordId;
-      console.log(`[beforeCreate] Duplicado detectado. Child ${duplicateResult.parentRecordId} será vinculado después`);
+      strapi.log.info(
+        `[beforeCreate] Duplicado detectado. Child ${duplicateResult.parentRecordId} será vinculado después`
+      );
     }
 
     // Validar relación padre/hijo
@@ -364,7 +391,11 @@ export default {
     }
   },
 
-  async afterCreate(event: { result: any; params: { data: BillingRecordData }; state?: Record<string, unknown> }) {
+  async afterCreate(event: {
+    result: any;
+    params: { data: BillingRecordData };
+    state?: Record<string, unknown>;
+  }) {
     const newRecord = event.result;
 
     // Si tenemos un child record pendiente por vincular, hacerlo ahora
@@ -374,7 +405,10 @@ export default {
     }
   },
 
-  async beforeUpdate(event: { params: { data: BillingRecordData; where: { id: number } }; state?: Record<string, unknown> }) {
+  async beforeUpdate(event: {
+    params: { data: BillingRecordData; where: { id: number } };
+    state?: Record<string, unknown>;
+  }) {
     const { data, where } = event.params;
 
     // Procesar cálculos de días de retraso y multas

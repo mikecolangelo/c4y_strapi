@@ -10,17 +10,13 @@
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "removeComments": true,
     "noEmitOnError": false,
     "noImplicitThis": true,
     "outDir": "dist",
     "rootDir": "."
   },
-  "include": [
-    "src/**/*",
-    "config/**/*",
-    "types/**/*",
-    "src/**/*.json"
-  ],
+  "include": ["src/**/*", "config/**/*", "types/**/*", "src/**/*.json"],
 
   "exclude": [
     "node_modules",

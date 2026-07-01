@@ -17,8 +17,7 @@
       "required": true
     },
     "role": {
-      "type": "enumeration",
-      "enum": ["admin", "driver", "lead"],
+      "type": "string",
       "required": true
     },
     "email": {
@@ -63,10 +62,11 @@
     "driverLicense": {
       "type": "string"
     },
-    "password": {
-      "type": "password",
-      "private": true,
-      "description": "LEGACY - No usar. La contraseña real vive en users-permissions"
+    "themePreference": {
+      "type": "enumeration",
+      "enum": ["light", "dark", "system"],
+      "default": "light",
+      "description": "Preferencia de tema (claro/oscuro) persistida por usuario"
     },
     "billingName": {
       "type": "string"
@@ -132,6 +132,12 @@
       "relation": "oneToMany",
       "target": "api::inventory-note.inventory-note",
       "mappedBy": "author"
+    },
+    "comments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::user-comment.user-comment",
+      "mappedBy": "subject"
     },
     "assignedVehicles": {
       "type": "relation",

@@ -1,0 +1,20 @@
+# Build output
+dist/
+dist.old/
+dist.old.admin/
+build/
+.cache/
+.strapi/
+coverage/
+
+# Dependencies & lockfiles
+node_modules/
+pnpm-lock.yaml
+
+# Generated types and static assets
+types/generated/
+public/
+
+# Logs and generated noise
+*.log
+src/extensions/documentation/documentation/
