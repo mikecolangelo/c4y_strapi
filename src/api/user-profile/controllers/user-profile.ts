@@ -22,10 +22,12 @@ export default factories.createCoreController('api::user-profile.user-profile', 
       return this.transformResponse(sanitizedEntity);
     }
 
-    // Validar rol
-    const validRoles = ['admin', 'driver'];
-    if (!validRoles.includes(data.role)) {
-      return ctx.badRequest('Rol invalido. Debe ser admin, driver o lead');
+    // Validar rol contra los roles ACTIVOS (incluye roles personalizados).
+    // 'lead' y los contactos sin email ya se resolvieron arriba (sin cuenta de
+    // acceso), asi que aqui solo aceptamos roles validos del sistema.
+    const roleKeys: string[] = await strapi.service('api::role.role').getRoleKeys();
+    if (!roleKeys.includes(data.role)) {
+      return ctx.badRequest(`Rol invalido. Roles validos: ${roleKeys.join(', ')}`);
     }
 
     const userService = strapi.plugin('users-permissions').service('user');
@@ -89,6 +91,11 @@ export default factories.createCoreController('api::user-profile.user-profile', 
   },
 
   async account(ctx) {
+    const user = ctx.state.user;
+    if (!user) {
+      return ctx.unauthorized('Authentication required');
+    }
+
     const { documentId } = ctx.params;
 
     if (!documentId) {
@@ -241,6 +248,9 @@ export default factories.createCoreController('api::user-profile.user-profile', 
     });
     const isAdmin = ['admin', 'super-admin'].includes(userProfile?.role);
 
+    // Roles validos para importar (incluye roles personalizados activos).
+    const importableRoles: string[] = await strapi.service('api::role.role').getRoleKeys();
+
     try {
       // Pre-cargar emails y telefonos existentes para deduplicacion eficiente
       const existingProfiles = await strapi.db.query('api::user-profile.user-profile').findMany({
@@ -328,14 +338,12 @@ export default factories.createCoreController('api::user-profile.user-profile', 
             continue;
           }
 
-          // Determinar rol: solo admins pueden importar roles distintos a 'lead'
+          // Determinar rol: solo admins pueden importar roles distintos a 'lead'.
           const requestedRole = row.role ? String(row.role).toLowerCase().trim() : null;
-          const allowedRoles = ['admin', 'driver', 'lead'];
-          const effectiveRole = (
-            isAdmin && requestedRole && allowedRoles.includes(requestedRole)
+          const effectiveRole: string =
+            isAdmin && requestedRole && importableRoles.includes(requestedRole)
               ? requestedRole
-              : 'lead'
-          ) as 'admin' | 'driver' | 'lead';
+              : 'lead';
 
           // Crear el lead. Se persisten todos los campos de contacto que el
           // import pueda traer (paridad con el modal "Crear Contacto"); los
