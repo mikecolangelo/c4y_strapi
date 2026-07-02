@@ -76,6 +76,80 @@ export const NOTIFICATION_STREAM_ACTIONS = [
   'api::notification.notification-stream.stream',
 ] as const;
 
+/** Builds the standard CRUD REST action set for a content-type UID. */
+const crud = (uid: string) => [
+  `${uid}.find`,
+  `${uid}.findOne`,
+  `${uid}.create`,
+  `${uid}.update`,
+  `${uid}.delete`,
+];
+
+/**
+ * Content-types now written through the real user JWT (instead of the server
+ * API token) so the role-permission matrix's per-role authorization actually
+ * applies. Strapi disables new content-types for the Authenticated role by
+ * default, so each of these needs its own grant, same as FLEET_ACTIONS above.
+ */
+export const FLEET_SIBLING_ACTIONS = [
+  ...crud('api::fleet-document.fleet-document'),
+  ...crud('api::fleet-document-type.fleet-document-type'),
+  ...crud('api::fleet-mileage-history.fleet-mileage-history'),
+  ...crud('api::fleet-note.fleet-note'),
+  ...crud('api::fleet-reminder.fleet-reminder'),
+  ...crud('api::fleet-status.fleet-status'),
+  ...crud('api::vehicle-document.vehicle-document'),
+  ...crud('api::vehicle-document-category.vehicle-document-category'),
+  ...crud('api::vehicle-state.vehicle-state'),
+  ...crud('api::driver-history.driver-history'),
+] as const;
+
+export const STOCK_ACTIONS = [
+  ...crud('api::inventory-item.inventory-item'),
+  ...crud('api::inventory-movement.inventory-movement'),
+  ...crud('api::inventory-note.inventory-note'),
+  ...crud('api::inventory-request.inventory-request'),
+  ...crud('api::supply-item.supply-item'),
+  ...crud('api::supply-request.supply-request'),
+  ...crud('api::maintenance-kit.maintenance-kit'),
+  ...crud('api::maintenance-kit-item.maintenance-kit-item'),
+] as const;
+
+export const BILLING_ACTIONS = [
+  ...crud('api::invoice.invoice'),
+  ...crud('api::financing.financing'),
+  ...crud('api::billing-document.billing-document'),
+  ...crud('api::billing-record.billing-record'),
+  ...crud('api::payment-application.payment-application'),
+  ...crud('api::penalty-debt.penalty-debt'),
+  ...crud('api::weekly-collection.weekly-collection'),
+  ...crud('api::communication-log.communication-log'),
+  ...crud('api::client.client'),
+] as const;
+
+export const DEAL_ACTIONS = [
+  ...crud('api::deal.deal'),
+  ...crud('api::deal-clause.deal-clause'),
+  ...crud('api::deal-discount.deal-discount'),
+  ...crud('api::contract-document.contract-document'),
+  ...crud('api::contract-type.contract-type'),
+] as const;
+
+export const CALENDAR_ACTIONS = [...crud('api::appointment.appointment')] as const;
+
+export const SERVICE_ORDER_ACTIONS = [
+  ...crud('api::service-order.service-order'),
+  ...crud('api::service-order-inventory-item.service-order-inventory-item'),
+  ...crud('api::service-note.service-note'),
+] as const;
+
+export const NOTIFICATION_ACTIONS = [...crud('api::notification.notification')] as const;
+
+export const SETTINGS_ACTIONS = [
+  ...crud('api::configuration.configuration'),
+  ...crud('api::company-info.company-info'),
+] as const;
+
 /**
  * Idempotently grants the given users-permissions `actions` to the
  * "Authenticated" role. Only missing permissions are created, so it is safe to

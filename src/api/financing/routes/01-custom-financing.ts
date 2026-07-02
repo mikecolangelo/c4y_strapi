@@ -10,7 +10,6 @@ export default {
       path: '/financing/email-config',
       handler: 'financing.getEmailConfig',
       config: {
-        auth: false,
         policies: [],
         middlewares: [],
       },
@@ -20,7 +19,6 @@ export default {
       path: '/financing/email-config',
       handler: 'financing.updateEmailConfig',
       config: {
-        auth: false,
         policies: [],
         middlewares: [],
       },
@@ -30,7 +28,6 @@ export default {
       path: '/financing/send-test-email',
       handler: 'financing.sendTestEmail',
       config: {
-        auth: false,
         policies: [],
         middlewares: [],
       },
@@ -40,7 +37,6 @@ export default {
       path: '/financing/:id/send-email',
       handler: 'financing.sendFinancingEmail',
       config: {
-        auth: false,
         policies: [],
         middlewares: [],
       },

@@ -7,4 +7,12 @@
 
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreRouter('api::menu-config.menu-config');
+const canWrite = { name: 'global::can-write-module', config: { module: 'settings' } };
+
+export default factories.createCoreRouter('api::menu-config.menu-config', {
+  config: {
+    create: { policies: [canWrite] },
+    update: { policies: [canWrite] },
+    delete: { policies: [canWrite] },
+  },
+});

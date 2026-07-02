@@ -4,4 +4,15 @@
 
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreRouter('api::vehicle-document-category.vehicle-document-category');
+const canWrite = { name: 'global::can-write-module', config: { module: 'fleet' } };
+
+export default factories.createCoreRouter(
+  'api::vehicle-document-category.vehicle-document-category',
+  {
+    config: {
+      create: { policies: [canWrite] },
+      update: { policies: [canWrite] },
+      delete: { policies: [canWrite] },
+    },
+  }
+);

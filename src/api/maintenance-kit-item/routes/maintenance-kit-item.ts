@@ -1,3 +1,11 @@
-import { factories } from '@strapi/strapi'
+import { factories } from '@strapi/strapi';
 
-export default factories.createCoreRouter('api::maintenance-kit-item.maintenance-kit-item');
+const canWrite = { name: 'global::can-write-module', config: { module: 'stock' } };
+
+export default factories.createCoreRouter('api::maintenance-kit-item.maintenance-kit-item', {
+  config: {
+    create: { policies: [canWrite] },
+    update: { policies: [canWrite] },
+    delete: { policies: [canWrite] },
+  },
+});

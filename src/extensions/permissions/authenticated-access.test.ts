@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   ensureAuthenticatedPermissions,
   SERVICE_CATALOG_ACTIONS,
+  STOCK_ACTIONS,
+  BILLING_ACTIONS,
+  CALENDAR_ACTIONS,
 } from './authenticated-access';
 
 /**
@@ -62,5 +65,27 @@ describe('ensureAuthenticatedPermissions', () => {
 
     expect(granted).toBe(0);
     expect(strapi.log.warn).toHaveBeenCalled();
+  });
+});
+
+describe('CRUD action lists for content-types now written via real user JWT', () => {
+  it('generates find/findOne/create/update/delete per content-type', () => {
+    expect(CALENDAR_ACTIONS).toEqual([
+      'api::appointment.appointment.find',
+      'api::appointment.appointment.findOne',
+      'api::appointment.appointment.create',
+      'api::appointment.appointment.update',
+      'api::appointment.appointment.delete',
+    ]);
+  });
+
+  it('covers every stock content-type with 5 actions each', () => {
+    expect(STOCK_ACTIONS.length).toBe(8 * 5);
+    expect(STOCK_ACTIONS).toContain('api::inventory-note.inventory-note.create');
+  });
+
+  it('covers every billing content-type with 5 actions each', () => {
+    expect(BILLING_ACTIONS.length).toBe(9 * 5);
+    expect(BILLING_ACTIONS).toContain('api::financing.financing.create');
   });
 });

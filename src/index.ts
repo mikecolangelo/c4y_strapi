@@ -6,6 +6,14 @@ import { seedVehicleDocumentCategories } from './extensions/seeders/vehicle-docu
 import {
   ensureAuthenticatedPermissions,
   FLEET_ACTIONS,
+  FLEET_SIBLING_ACTIONS,
+  STOCK_ACTIONS,
+  BILLING_ACTIONS,
+  DEAL_ACTIONS,
+  CALENDAR_ACTIONS,
+  SERVICE_ORDER_ACTIONS,
+  NOTIFICATION_ACTIONS,
+  SETTINGS_ACTIONS,
   MENU_CONFIG_ACTIONS,
   NOTIFICATION_STREAM_ACTIONS,
   ROLE_ACTIONS,
@@ -121,6 +129,14 @@ export default {
     await ensureAuthenticatedPermissions(strapi, USER_COMMENT_ACTIONS, 'user-comment');
     await ensureAuthenticatedPermissions(strapi, USER_PROFILE_ACTIONS, 'user-profile');
     await ensureAuthenticatedPermissions(strapi, FLEET_ACTIONS, 'fleet');
+    await ensureAuthenticatedPermissions(strapi, FLEET_SIBLING_ACTIONS, 'fleet-related');
+    await ensureAuthenticatedPermissions(strapi, STOCK_ACTIONS, 'stock');
+    await ensureAuthenticatedPermissions(strapi, BILLING_ACTIONS, 'billing');
+    await ensureAuthenticatedPermissions(strapi, DEAL_ACTIONS, 'deal');
+    await ensureAuthenticatedPermissions(strapi, CALENDAR_ACTIONS, 'calendar');
+    await ensureAuthenticatedPermissions(strapi, SERVICE_ORDER_ACTIONS, 'service-order');
+    await ensureAuthenticatedPermissions(strapi, NOTIFICATION_ACTIONS, 'notification');
+    await ensureAuthenticatedPermissions(strapi, SETTINGS_ACTIONS, 'settings');
 
     // Grant the real-time notifications SSE stream to Authenticated users.
     await ensureAuthenticatedPermissions(
