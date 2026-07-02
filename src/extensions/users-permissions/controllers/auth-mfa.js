@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 'use strict';
 
 module.exports = ({ strapi }) => ({
@@ -39,6 +40,11 @@ module.exports = ({ strapi }) => ({
 
       ctx.send({ success: true, message: 'Código de verificación enviado al correo' });
     } catch (error) {
+      if (error.code === 'OTP_BLOCKED') {
+        return ctx.badRequest(
+          'Cuenta bloqueada temporalmente por intentos fallidos. Intenta en 15 minutos.'
+        );
+      }
       strapi.log.error('Error en MFA request:', error);
       ctx.internalServerError('Error al procesar la solicitud de verificación');
     }
@@ -66,7 +72,9 @@ module.exports = ({ strapi }) => ({
 
       if (!result.valid) {
         if (result.reason === 'BLOCKED') {
-          return ctx.badRequest('Cuenta bloqueada temporalmente por intentos fallidos. Intenta en 15 minutos.');
+          return ctx.badRequest(
+            'Cuenta bloqueada temporalmente por intentos fallidos. Intenta en 15 minutos.'
+          );
         }
         if (result.reason === 'EXPIRED') {
           return ctx.badRequest('El código ha expirado. Solicita uno nuevo.');
@@ -74,7 +82,9 @@ module.exports = ({ strapi }) => ({
         if (result.reason === 'NO_OTP') {
           return ctx.badRequest('No hay un código activo para este usuario');
         }
-        return ctx.badRequest(`Código incorrecto. Intentos restantes: ${result.remainingAttempts ?? 0}`);
+        return ctx.badRequest(
+          `Código incorrecto. Intentos restantes: ${result.remainingAttempts ?? 0}`
+        );
       }
 
       // Actualizar usuario como validado

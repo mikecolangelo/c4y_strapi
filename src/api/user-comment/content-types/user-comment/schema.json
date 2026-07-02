@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_comments",
+  "info": {
+    "singularName": "user-comment",
+    "pluralName": "user-comments",
+    "displayName": "User Comment",
+    "description": "Free-form comments shown as a timeline on a contact's detail page"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "content": {
+      "type": "text",
+      "required": true
+    },
+    "authorDocumentId": {
+      "type": "string",
+      "required": true
+    },
+    "authorName": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "comments"
+    }
+  }
+}

@@ -4,6 +4,8 @@
 
 import type { Core } from '@strapi/strapi';
 
+const canWrite = { name: 'global::can-write-module', config: { module: 'fleet' } };
+
 export default {
   routes: [
     {
@@ -20,7 +22,7 @@ export default {
       path: '/vehicle-document-categories/reorder',
       handler: 'api::vehicle-document-category.vehicle-document-category.reorder',
       config: {
-        policies: [],
+        policies: [canWrite],
         middlewares: [],
       },
     },

@@ -8,17 +8,23 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
   /**
    * Crea un user-profile automáticamente cuando se crea un usuario
    */
-  async createProfileForUser(userId: number, userData: { email?: string; username?: string; fullName?: string }) {
+  async createProfileForUser(
+    userId: number,
+    userData: { email?: string; username?: string; fullName?: string }
+  ) {
     try {
       // Verificar si ya existe un user-profile para este usuario
-      const existingProfile = await strapi.entityService.findMany('api::user-profile.user-profile', {
-        filters: {
-          userAccount: {
-            id: userId,
+      const existingProfile = await strapi.entityService.findMany(
+        'api::user-profile.user-profile',
+        {
+          filters: {
+            userAccount: {
+              id: userId,
+            },
           },
-        },
-        limit: 1,
-      });
+          limit: 1,
+        }
+      );
 
       if (existingProfile && existingProfile.length > 0) {
         strapi.log.info(`User-profile ya existe para el usuario ${userId}`);
@@ -27,7 +33,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
 
       // Determinar el displayName
       let displayName = userData.fullName || userData.username || 'Usuario';
-      
+
       // Si el username es un email, usar la parte antes del @
       if (displayName.includes('@')) {
         const emailPart = displayName.split('@')[0];
@@ -57,7 +63,11 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
    * que no sea lead y que no tenga userAccount vinculado.
    * Reutiliza la logica de promoteLeadToUser pero sin la restriccion de role === 'lead'.
    */
-  async createAccountForProfile(profileDocumentId: string, targetRole: 'admin' | 'driver', customPassword?: string) {
+  async createAccountForProfile(
+    profileDocumentId: string,
+    targetRole: 'admin' | 'driver',
+    customPassword?: string
+  ) {
     // 1. Buscar el perfil
     const profile = await strapi.db.query('api::user-profile.user-profile').findOne({
       where: { documentId: profileDocumentId },
@@ -95,7 +105,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
       if (linkedProfile) {
         throw new Error(
           `El email ${profile.email} ya pertenece a un usuario activo vinculado al contacto "${linkedProfile.displayName || linkedProfile.email}". ` +
-          'No se puede crear un duplicado.'
+            'No se puede crear un duplicado.'
         );
       }
 
@@ -166,7 +176,10 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
       try {
         await userService.remove({ id: authUser.id });
       } catch (removeError) {
-        strapi.log.error('Error limpiando usuario huérfano tras fallo de vinculacion:', removeError);
+        strapi.log.error(
+          'Error limpiando usuario huérfano tras fallo de vinculacion:',
+          removeError
+        );
       }
       throw updateError;
     }
@@ -175,7 +188,11 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
   /**
    * Promueve un lead a usuario nativo de Strapi
    */
-  async promoteLeadToUser(leadDocumentId: string, targetRole: 'admin' | 'driver', customPassword?: string) {
+  async promoteLeadToUser(
+    leadDocumentId: string,
+    targetRole: 'admin' | 'driver',
+    customPassword?: string
+  ) {
     // 1. Buscar el lead por documentId con su cuenta de usuario si existe
     const lead = await strapi.db.query('api::user-profile.user-profile').findOne({
       where: { documentId: leadDocumentId },
@@ -199,7 +216,8 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
 
     // 3. Si el lead ya tiene un userAccount vinculado, verificar que exista y reutilizarlo
     if (lead.userAccount) {
-      const existingUserId = typeof lead.userAccount === 'object' ? lead.userAccount.id : lead.userAccount;
+      const existingUserId =
+        typeof lead.userAccount === 'object' ? lead.userAccount.id : lead.userAccount;
       const existingUser = await strapi.db.query('plugin::users-permissions.user').findOne({
         where: { id: existingUserId },
       });
@@ -238,7 +256,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
     if (existingProfileByEmail) {
       throw new Error(
         `Ya existe un contacto activo (${existingProfileByEmail.displayName || existingProfileByEmail.email}) con este email. ` +
-        `No se puede crear un duplicado. Use el contacto existente o cambie el email de este lead.`
+          `No se puede crear un duplicado. Use el contacto existente o cambie el email de este lead.`
       );
     }
 
@@ -259,7 +277,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
       if (linkedProfile) {
         throw new Error(
           `El email ${lead.email} ya pertenece a un usuario activo vinculado al contacto "${linkedProfile.displayName || linkedProfile.email}". ` +
-          `No se puede crear un duplicado.`
+            `No se puede crear un duplicado.`
         );
       }
 
@@ -297,7 +315,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
       }
     }
 
-    // 6. Crear usuario en plugin::users-permissions.user
+    // 7. Crear usuario en plugin::users-permissions.user
     // Usamos el servicio del plugin que hashea la contraseña automáticamente
     const authUser = await userService.add({
       username: lead.email,
@@ -309,7 +327,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
     });
 
     try {
-      // 7. Actualizar user-profile
+      // 8. Actualizar user-profile
       const userProfile = await strapi.entityService.update(
         'api::user-profile.user-profile',
         lead.id,
@@ -321,7 +339,7 @@ export default factories.createCoreService('api::user-profile.user-profile', ({ 
         }
       );
 
-      // 8. Retornar resultado
+      // 9. Retornar resultado
       return {
         userProfile,
         authUser,

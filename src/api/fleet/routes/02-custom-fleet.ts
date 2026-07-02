@@ -4,6 +4,8 @@
 
 import type { Core } from '@strapi/strapi';
 
+const canWrite = { name: 'global::can-write-module', config: { module: 'fleet' } };
+
 const customRoutes = [
   {
     method: 'POST',
@@ -11,7 +13,7 @@ const customRoutes = [
     handler: 'api::fleet.fleet.setMileageRecord',
     config: {
       // auth omitted to require authentication by default in Strapi 5
-      policies: [],
+      policies: [canWrite],
       middlewares: [],
     },
   },
@@ -21,7 +23,7 @@ const customRoutes = [
     handler: 'api::fleet.fleet.recordOilChange',
     config: {
       // auth omitted to require authentication by default in Strapi 5
-      policies: [],
+      policies: [canWrite],
       middlewares: [],
     },
   },
@@ -35,7 +37,16 @@ const customRoutes = [
       middlewares: [],
     },
   },
-
+  {
+    method: 'DELETE',
+    path: '/fleets/:documentId/mileage-history/:recordId',
+    handler: 'api::fleet.fleet.deleteMileageRecord',
+    config: {
+      // auth omitted to require authentication by default in Strapi 5
+      policies: [canWrite],
+      middlewares: [],
+    },
+  },
 ];
 
 export default {

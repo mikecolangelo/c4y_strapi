@@ -1,14 +1,34 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 'use strict';
+
+const crypto = require('crypto');
 
 function createOtpService({ strapi }) {
   const knex = strapi.db.connection;
 
   return {
     generateCode() {
-      return Math.floor(100000 + Math.random() * 900000).toString();
+      return crypto.randomInt(100000, 1000000).toString();
     },
 
     async createOtp(userId) {
+      // El bloqueo por intentos fallidos se guarda en la fila del OTP, no por
+      // usuario. Si no chequeamos acá, pedir un código nuevo resetea el
+      // contador de intentos y anula el bloqueo por completo.
+      const activeBlock = await knex('otp_codes')
+        .where({ user_id: userId })
+        .whereNotNull('blocked_until')
+        .andWhere('blocked_until', '>', new Date())
+        .orderBy('created_at', 'desc')
+        .first();
+
+      if (activeBlock) {
+        const error = new Error('BLOCKED');
+        error.code = 'OTP_BLOCKED';
+        error.blockedUntil = activeBlock.blocked_until;
+        throw error;
+      }
+
       const code = this.generateCode();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
 

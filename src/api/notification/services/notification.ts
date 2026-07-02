@@ -38,12 +38,15 @@ export default factories.createCoreService('api::notification.notification', ({ 
             fields: ['id', 'documentId'] as any,
           }
         );
-        const foundNotification = allNotifications.find((n: any) => n.documentId === reminder.documentId);
+        const foundNotification = allNotifications.find(
+          (n: any) => n.documentId === reminder.documentId
+        );
         if (foundNotification && foundNotification.id) {
           // Convertir ID a número si es necesario
-          const idValue = typeof foundNotification.id === 'number' 
-            ? foundNotification.id 
-            : parseInt(String(foundNotification.id), 10);
+          const idValue =
+            typeof foundNotification.id === 'number'
+              ? foundNotification.id
+              : parseInt(String(foundNotification.id), 10);
           if (!isNaN(idValue)) {
             reminderId = idValue;
             fullReminder = await strapi.entityService.findOne(
@@ -58,18 +61,22 @@ export default factories.createCoreService('api::notification.notification', ({ 
       }
 
       if (!fullReminder || !reminderId) {
-        console.warn(`Recordatorio no encontrado:`, { id: reminder.id, documentId: reminder.documentId });
+        strapi.log.warn(`Recordatorio no encontrado:`, {
+          id: reminder.id,
+          documentId: reminder.documentId,
+        });
         return;
       }
 
       // IMPORTANTE: Verificar que este NO sea una notificación individual
       // Si tiene parentReminderId en tags, es una notificación individual y no debe procesarse
       try {
-        const reminderTags = typeof fullReminder.tags === 'string' 
-          ? JSON.parse(fullReminder.tags) 
-          : fullReminder.tags;
+        const reminderTags =
+          typeof fullReminder.tags === 'string' ? JSON.parse(fullReminder.tags) : fullReminder.tags;
         if (reminderTags && reminderTags.parentReminderId) {
-          console.warn(`Intento de sincronizar notificaciones para una notificación individual (tiene parentReminderId). Ignorando.`);
+          strapi.log.warn(
+            `Intento de sincronizar notificaciones para una notificación individual (tiene parentReminderId). Ignorando.`
+          );
           return;
         }
       } catch {
@@ -77,7 +84,7 @@ export default factories.createCoreService('api::notification.notification', ({ 
       }
 
       const assignedUsers: any[] = fullReminder.assignedUsers || [];
-      
+
       if (assignedUsers.length === 0) {
         // Si no hay usuarios asignados, no crear notificaciones individuales
         // El recordatorio principal ya existe
@@ -110,9 +117,11 @@ export default factories.createCoreService('api::notification.notification', ({ 
             return false;
           }
           // Comparar con ID numérico (preferido) o documentId (fallback)
-          return tags.parentReminderId === reminderId || 
-                 tags.parentReminderId === fullReminder.documentId ||
-                 tags.parentReminderId === reminder.documentId;
+          return (
+            tags.parentReminderId === reminderId ||
+            tags.parentReminderId === fullReminder.documentId ||
+            tags.parentReminderId === reminder.documentId
+          );
         } catch {
           return false;
         }
@@ -126,7 +135,7 @@ export default factories.createCoreService('api::notification.notification', ({ 
       }
 
       // Determinar si la notificación debe estar marcada como leída
-      const shouldBeRead = 
+      const shouldBeRead =
         fullReminder.isCompleted ||
         !fullReminder.isActive ||
         (fullReminder.nextTrigger && new Date(fullReminder.nextTrigger) < new Date());
@@ -135,7 +144,7 @@ export default factories.createCoreService('api::notification.notification', ({ 
       for (const user of assignedUsers) {
         // Validar que el usuario tenga un ID válido
         if (!user || !user.id) {
-          console.warn('Usuario asignado sin ID válido, saltando:', user);
+          strapi.log.warn('Usuario asignado sin ID válido, saltando:', user);
           continue;
         }
 
@@ -169,12 +178,12 @@ export default factories.createCoreService('api::notification.notification', ({ 
         if (fullReminder.module === 'fleet' && fullReminder.fleetVehicle) {
           notificationData.fleetVehicle = fullReminder.fleetVehicle.id;
         }
-        
+
         // Agregar authorDocumentId y author si existen en el recordatorio principal
         if (fullReminder.authorDocumentId) {
           notificationData.authorDocumentId = fullReminder.authorDocumentId;
         }
-        
+
         if (fullReminder.author && fullReminder.author.id) {
           notificationData.author = fullReminder.author.id;
         }
@@ -182,11 +191,11 @@ export default factories.createCoreService('api::notification.notification', ({ 
         if (existingNotification) {
           // Si el recordatorio está activo y no completado, y la fecha aún no ha pasado,
           // respetar el estado isRead actual
-          const finalIsRead = 
-            (fullReminder.isActive && 
-             !fullReminder.isCompleted && 
-             fullReminder.nextTrigger &&
-             new Date(fullReminder.nextTrigger) >= new Date())
+          const finalIsRead =
+            fullReminder.isActive &&
+            !fullReminder.isCompleted &&
+            fullReminder.nextTrigger &&
+            new Date(fullReminder.nextTrigger) >= new Date()
               ? existingNotification.isRead
               : shouldBeRead;
 
@@ -204,14 +213,20 @@ export default factories.createCoreService('api::notification.notification', ({ 
           // Crear nueva notificación individual
           // VALIDACIÓN CRÍTICA: Asegurar que siempre tenga recipient y parentReminderId
           if (!notificationData.recipient) {
-            console.error('ERROR: Intento de crear notificación individual sin recipient. Saltando usuario:', user);
+            strapi.log.error(
+              'ERROR: Intento de crear notificación individual sin recipient. Saltando usuario:',
+              user
+            );
             continue;
           }
           if (!notificationData.tags || !notificationData.tags.parentReminderId) {
-            console.error('ERROR: Intento de crear notificación individual sin parentReminderId. Saltando usuario:', user);
+            strapi.log.error(
+              'ERROR: Intento de crear notificación individual sin parentReminderId. Saltando usuario:',
+              user
+            );
             continue;
           }
-          
+
           notificationData.isRead = shouldBeRead;
           await strapi.entityService.create('api::notification.notification', {
             data: notificationData,
@@ -222,10 +237,8 @@ export default factories.createCoreService('api::notification.notification', ({ 
       // Eliminar notificaciones para usuarios que ya no están asignados
       for (const existingNotification of filteredNotifications) {
         const recipient = (existingNotification as any).recipient;
-        const userStillAssigned = assignedUsers.some(
-          (u: any) => u.id === recipient?.id
-        );
-        
+        const userStillAssigned = assignedUsers.some((u: any) => u.id === recipient?.id);
+
         if (!userStillAssigned) {
           await strapi.entityService.delete(
             'api::notification.notification',
@@ -234,7 +247,7 @@ export default factories.createCoreService('api::notification.notification', ({ 
         }
       }
     } catch (error) {
-      console.error('Error sincronizando notificaciones del recordatorio:', error);
+      strapi.log.error('Error sincronizando notificaciones del recordatorio:', error);
       throw error;
     }
   },
@@ -246,7 +259,7 @@ export default factories.createCoreService('api::notification.notification', ({ 
     try {
       // Obtener el recordatorio para asegurar que tenemos el ID numérico
       let numericId: number | null = null;
-      
+
       if (typeof reminderId === 'number') {
         numericId = reminderId;
       } else {
@@ -261,9 +274,10 @@ export default factories.createCoreService('api::notification.notification', ({ 
         const foundNotification = allNotifications.find((n: any) => n.documentId === reminderId);
         if (foundNotification && foundNotification.id) {
           // Convertir ID a número si es necesario
-          const idValue = typeof foundNotification.id === 'number' 
-            ? foundNotification.id 
-            : parseInt(String(foundNotification.id), 10);
+          const idValue =
+            typeof foundNotification.id === 'number'
+              ? foundNotification.id
+              : parseInt(String(foundNotification.id), 10);
           if (!isNaN(idValue)) {
             numericId = idValue;
           }
@@ -271,7 +285,7 @@ export default factories.createCoreService('api::notification.notification', ({ 
       }
 
       if (!numericId) {
-        console.warn(`No se pudo encontrar el ID numérico para: ${reminderId}`);
+        strapi.log.warn(`No se pudo encontrar el ID numérico para: ${reminderId}`);
         return;
       }
 
@@ -294,21 +308,17 @@ export default factories.createCoreService('api::notification.notification', ({ 
             return false;
           }
           // Comparar con ID numérico (preferido) o documentId (fallback)
-          return tags.parentReminderId === numericId || 
-                 tags.parentReminderId === reminderId;
+          return tags.parentReminderId === numericId || tags.parentReminderId === reminderId;
         } catch {
           return false;
         }
       });
 
       for (const notification of notifications) {
-        await strapi.entityService.delete(
-          'api::notification.notification',
-          notification.id
-        );
+        await strapi.entityService.delete('api::notification.notification', notification.id);
       }
     } catch (error) {
-      console.error('Error eliminando notificaciones del recordatorio:', error);
+      strapi.log.error('Error eliminando notificaciones del recordatorio:', error);
       throw error;
     }
   },

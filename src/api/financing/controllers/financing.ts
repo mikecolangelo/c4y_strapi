@@ -25,7 +25,9 @@ function getFinancingVariables(financing: any): Record<string, string> {
 
   vars.financingNumber = financing.financingNumber || '';
   vars.totalAmount = financing.totalAmount ? Number(financing.totalAmount).toFixed(2) : '0.00';
-  vars.currentBalance = financing.currentBalance ? Number(financing.currentBalance).toFixed(2) : '0.00';
+  vars.currentBalance = financing.currentBalance
+    ? Number(financing.currentBalance).toFixed(2)
+    : '0.00';
   vars.totalPaid = financing.totalPaid ? Number(financing.totalPaid).toFixed(2) : '0.00';
   vars.quotaAmount = financing.quotaAmount ? Number(financing.quotaAmount).toFixed(2) : '0.00';
   vars.paidQuotas = String(financing.paidQuotas || 0);
@@ -35,7 +37,9 @@ function getFinancingVariables(financing: any): Record<string, string> {
   vars.nextDueDate = financing.nextDueDate || '';
   vars.paymentFrequency = financing.paymentFrequency || '';
   vars.lateQuotasCount = String(financing.lateQuotasCount || 0);
-  vars.totalLateFees = financing.totalLateFees ? Number(financing.totalLateFees).toFixed(2) : '0.00';
+  vars.totalLateFees = financing.totalLateFees
+    ? Number(financing.totalLateFees).toFixed(2)
+    : '0.00';
 
   const client = financing.client;
   if (client) {
@@ -112,7 +116,10 @@ async function getSmtpConfig(strapi: any) {
 /**
  * Envía un email usando nodemailer.
  */
-async function sendEmail(strapi: any, { to, subject, html, text }: { to: string; subject: string; html: string; text?: string }) {
+async function sendEmail(
+  strapi: any,
+  { to, subject, html, text }: { to: string; subject: string; html: string; text?: string }
+) {
   const config = await getSmtpConfig(strapi);
 
   if (!config.host || !config.user || !config.pass) {
@@ -221,6 +228,16 @@ async function getEmailTemplates(strapi: any) {
 export default factories.createCoreController('api::financing.financing', ({ strapi }) => ({
   async getEmailConfig(ctx: any) {
     try {
+      const user = ctx.state.user;
+      if (!user) return ctx.unauthorized('No autenticado');
+
+      const profile = await strapi.db.query('api::user-profile.user-profile').findOne({
+        where: { email: user.email },
+      });
+      if (!profile || !ADMIN_ROLES.includes(profile.role)) {
+        return ctx.forbidden('Se requieren permisos de administrador');
+      }
+
       const smtp = await getSmtpConfig(strapi);
       const templates = await getEmailTemplates(strapi);
 
@@ -261,7 +278,10 @@ export default factories.createCoreController('api::financing.financing', ({ str
         { key: 'billing-smtp-user', value: smtp?.user || '' },
         { key: 'billing-smtp-pass', value: smtp?.pass || '', isSecret: true },
         { key: 'billing-smtp-from', value: smtp?.from || '' },
-        { key: 'billing-smtp-secure', value: smtp?.secure !== undefined ? String(smtp.secure) : 'true' },
+        {
+          key: 'billing-smtp-secure',
+          value: smtp?.secure !== undefined ? String(smtp.secure) : 'true',
+        },
       ];
 
       for (const cfg of smtpConfigs) {
@@ -375,7 +395,18 @@ export default factories.createCoreController('api::financing.financing', ({ str
       const financing = await strapi.documents('api::financing.financing').findOne({
         documentId: id,
         populate: {
-          client: { fields: ['displayName', 'email', 'phone', 'billingName', 'billingPhone', 'identificationNumber', 'address', 'billingAddress'] },
+          client: {
+            fields: [
+              'displayName',
+              'email',
+              'phone',
+              'billingName',
+              'billingPhone',
+              'identificationNumber',
+              'address',
+              'billingAddress',
+            ],
+          },
           vehicle: { fields: ['brand', 'model', 'year', 'placa', 'vin'] },
         },
       });
